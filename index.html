@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TerritoryOS - Gestión de Territorios</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f6f6f8;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5048e5',
+                        'background-light': '#f6f6f8',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="text-slate-900 antialiased">
+    <div id="app" class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 border-r border-slate-200 bg-white flex flex-col h-full shrink-0">
+            <div class="p-6">
+                <div class="flex items-center gap-3 text-primary mb-8">
+                    <div class="bg-primary text-white p-1.5 rounded-lg">
+                        <i data-lucide="map" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight">TerritoryOS</span>
+                </div>
+                
+                <nav class="space-y-1">
+                    <button onclick="setView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 bg-primary/10 text-primary font-medium">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        <span class="text-sm">Dashboard</span>
+                    </button>
+                    <button onclick="setView('management')" id="nav-management" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                        <i data-lucide="map" class="w-5 h-5"></i>
+                        <span class="text-sm">Territorios</span>
+                    </button>
+                    <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        <span class="text-sm">Analíticas</span>
+                    </button>
+                    <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                        <span class="text-sm">Equipo</span>
+                    </button>
+                    <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        <span class="text-sm">Configuración</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mt-auto p-4 border-t border-slate-200">
+                <div class="flex items-center gap-3 px-2">
+                    <div class="size-10 rounded-full bg-slate-200 overflow-hidden">
+                        <img src="https://picsum.photos/seed/user123/100/100" alt="User" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex flex-col overflow-hidden">
+                        <span class="text-sm font-semibold truncate">Admin Usuario</span>
+                        <span class="text-xs text-slate-500">Plan Enterprise</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8 shrink-0">
+                <div class="flex items-center gap-2">
+                    <div id="breadcrumb" class="hidden items-center gap-2">
+                        <span class="text-sm text-slate-500">Territorios</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <h1 id="page-title" class="text-xl font-bold text-slate-900">Panel de Territorios</h1>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="relative hidden md:block">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                        <input type="text" placeholder="Buscar territorio..." class="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-lg text-sm w-64 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <button class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                    </button>
+
+                    <div class="relative data-menu-container">
+                        <button onclick="event.stopPropagation(); toggleDataMenu()" class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2" title="Datos">
+                            <i data-lucide="database" class="w-5 h-5"></i>
+                        </button>
+                        <div id="data-menu" class="hidden absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                            <button onclick="event.stopPropagation(); exportBackupJSON()" class="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm flex items-center gap-2">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                Exportar backup (JSON)
+                            </button>
+                            <label class="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm flex items-center gap-2 cursor-pointer">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                                Importar backup (JSON)
+                                <input id="import-backup-input" type="file" accept="application/json" class="hidden" onchange="importBackupJSON(event)">
+                            </label>
+                            <div class="border-t border-slate-200"></div>
+                            <button onclick="event.stopPropagation(); exportAssignmentsCSV()" class="w-full text-left px-4 py-2 hover:bg-slate-50 text-sm flex items-center gap-2">
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                Exportar registros (CSV)
+                            </button>
+                            <div class="border-t border-slate-200"></div>
+                            <button onclick="event.stopPropagation(); clearLocalData()" class="w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-red-600 flex items-center gap-2">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                Borrar datos locales
+                            </button>
+                        </div>
+                    </div>
+
+                    <button onclick="openTerritoryModal()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Nuevo Territorio
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div id="content" class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                <!-- Dashboard View (Default) -->
+                <div id="view-dashboard" class="space-y-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <p class="text-sm text-slate-500 font-medium">Total Territorios</p>
+                            <p id="stat-total" class="text-3xl font-bold mt-1 text-slate-900">50</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <p class="text-sm text-slate-500 font-medium">Asignados</p>
+                            <p id="stat-assigned" class="text-3xl font-bold mt-1 text-primary">42</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <p class="text-sm text-slate-500 font-medium">En Revisión</p>
+                            <p id="stat-review" class="text-3xl font-bold mt-1 text-amber-500">6</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <p class="text-sm text-slate-500 font-medium">Sin Actividad</p>
+                            <p id="stat-inactive" class="text-3xl font-bold mt-1 text-slate-400">2</p>
+                        </div>
+                    </div>
+
+                    <div id="territories-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-3">
+                        <!-- Territories will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Management View (Hidden by default) -->
+                <div id="view-management" class="hidden space-y-8 max-w-6xl mx-auto">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div>
+                            <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Gestión de Territorio</h2>
+                            <p class="text-slate-500 mt-1">Administre las asignaciones y el estado actual del sector.</p>
+                        </div>
+                        <div class="w-full md:w-64">
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Seleccionar Territorio</label>
+                            <select id="territory-selector" onchange="selectTerritory(this.value)" class="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-primary focus:border-primary outline-none py-2 px-3">
+                                <option value="">Seleccione ID</option>
+                                <!-- Options will be injected here -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Assignment Form -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                <div class="p-6 border-b border-slate-200 bg-slate-50/50">
+                                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="user-plus" class="w-5 h-5 text-primary"></i>
+                                        Nueva Asignación
+                                    </h3>
+                                </div>
+                                <form id="assignment-form" class="p-6 space-y-5" onsubmit="handleAssignmentSubmit(event)">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Conductor</label>
+                                        <input id="form-conductor" type="text" class="w-full rounded-lg border-slate-300 focus:ring-primary focus:border-primary outline-none py-2 px-3" placeholder="Nombre completo" maxlength="25" required>
+                                        <p class="mt-1 text-[10px] text-slate-400 text-right">Máx. 25 caracteres</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Fecha de Asignación</label>
+                                        <div class="relative">
+                                            <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                                            <input id="form-fecha" type="date" class="w-full rounded-lg border-slate-300 focus:ring-primary focus:border-primary outline-none py-2 pl-10 pr-3" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-medium text-slate-700">Completado</span>
+                                            <span class="text-[10px] text-slate-500">¿El servicio finalizó?</span>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input id="form-completado" type="checkbox" class="sr-only peer">
+                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                        </label>
+                                    </div>
+
+                                    <button id="form-submit-btn" type="submit" disabled class="w-full bg-primary hover:bg-primary/90 disabled:bg-slate-300 disabled:shadow-none text-white font-bold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md shadow-primary/20">
+                                        Confirmar Registro
+                                    </button>
+                                    <p id="form-warning" class="text-[10px] text-amber-600 text-center">Selecciona un territorio primero</p>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- History & Map -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+                                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="history" class="w-5 h-5 text-primary"></i>
+                                        Historial de Registros
+                                    </h3>
+                                    <button class="text-primary text-sm font-semibold hover:underline">Ver todos</button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead class="bg-slate-50">
+                                            <tr>
+                                                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Conductor</th>
+                                                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fecha</th>
+                                                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Estado</th>
+                                                <th class="px-6 py-4"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="history-body" class="divide-y divide-slate-100">
+                                            <!-- History items will be injected here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Map Preview -->
+                            <div class="rounded-xl overflow-hidden h-48 border border-slate-200 relative bg-slate-200 group">
+                                <img src="https://picsum.photos/seed/map-preview/1200/400?grayscale" alt="Mapa" class="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity">
+                                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                    <i data-lucide="map-pin" class="w-8 h-8 text-primary mb-2"></i>
+                                    <span class="bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">Vista Previa de Mapa</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- New Territory Modal -->
+        <div id="territory-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-slate-900">Crear Nuevo Territorio</h3>
+                    <button onclick="closeTerritoryModal()" class="text-slate-400 hover:text-slate-600">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <p class="text-slate-600">¿Estás seguro de que deseas crear un nuevo territorio? Se le asignará automáticamente el siguiente ID disponible.</p>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <span class="text-sm text-slate-500">Próximo ID:</span>
+                        <span id="next-territory-id" class="ml-2 text-lg font-bold text-primary">51</span>
+                    </div>
+                </div>
+                <div class="p-6 bg-slate-50 flex gap-3">
+                    <button onclick="closeTerritoryModal()" class="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 font-semibold text-slate-600 hover:bg-white transition-colors">
+                        Cancelar
+                    </button>
+                    <button onclick="confirmAddTerritory()" class="flex-1 px-4 py-2.5 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors shadow-md shadow-primary/20">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================
+        // TerritoryOS - State & Storage (v1)
+        // =========================
+        const STORAGE_KEY = 'territoryos_v1';
+
+        // App state (single source of truth)
+        let state = loadState();
+
+        // UI state
+        let selectedTerritoryId = null;
+        let currentView = 'dashboard';
+        let activeMenuId = null;
+
+        function defaultState() {
+            const territories = Array.from({ length: 50 }, (_, i) => ({
+                id: (i + 1).toString().padStart(2, '0'),
+                status: 'inactive', // 'inactive' | 'assigned' | 'review'
+            }));
+            return {
+                territories,
+                assignments: [], // {id, territoryId, conductor, fechaISO, fechaLabel, estado}
+                nextAssignmentId: 1
+            };
+        }
+
+        function safeParse(json) {
+            try { return JSON.parse(json); } catch { return null; }
+        }
+
+        function loadState() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return defaultState();
+
+            const parsed = safeParse(raw);
+            if (!parsed || !Array.isArray(parsed.territories) || !Array.isArray(parsed.assignments)) {
+                return defaultState();
+            }
+
+            // Ensure at least 50 territories exist (in case older data is incomplete)
+            const base = defaultState();
+            const byId = new Map(parsed.territories.map(t => [t.id, t]));
+            const territories = base.territories.map(t => ({
+                ...t,
+                ...(byId.get(t.id) || {}),
+            }));
+
+            // Keep any extra territories beyond 50 (created by the user)
+            const extras = parsed.territories.filter(t => !territories.some(b => b.id === t.id));
+            extras.forEach(t => territories.push(t));
+
+            const nextAssignmentId =
+                typeof parsed.nextAssignmentId === 'number'
+                    ? parsed.nextAssignmentId
+                    : (parsed.assignments.reduce((m, a) => Math.max(m, Number(a.id) || 0), 0) + 1);
+
+            const out = { territories, assignments: parsed.assignments, nextAssignmentId };
+            // Recompute derived territory fields (registros/status) from assignments
+            recomputeTerritories(out);
+            return out;
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        // Derive territory 'registros' and 'status' from assignments
+        function recomputeTerritories(st) {
+            const counts = new Map(); // id -> count
+            const hasReview = new Map(); // id -> boolean
+            st.assignments.forEach(a => {
+                if (!a || !a.territoryId) return;
+                counts.set(a.territoryId, (counts.get(a.territoryId) || 0) + 1);
+                if (a.estado === 'En revisión') hasReview.set(a.territoryId, true);
+            });
+
+            st.territories = st.territories.map(t => {
+                const c = counts.get(t.id) || 0;
+                const status = c === 0 ? 'inactive' : (hasReview.get(t.id) ? 'review' : 'assigned');
+                return { ...t, registros: c, status };
+            });
+        }
+
+        // =========================
+        // Init
+        // =========================
+        function init() {
+            recomputeTerritories(state);
+            renderDashboard();
+            renderManagement();
+            updateStats();
+            lucide.createIcons();
+        }
+
+        // Close menu on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.kebab-menu-container')) closeMenu();
+            if (!e.target.closest('.data-menu-container')) closeDataMenu();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { closeMenu(); closeDataMenu(); }
+        });
+
+        function closeMenu() {
+            if (activeMenuId !== null) {
+                activeMenuId = null;
+                renderManagement();
+            }
+        }
+
+        
+        // =========================
+        // Data export/import (local only)
+        // =========================
+        let dataMenuOpen = false;
+
+        function toggleDataMenu() {
+            const menu = document.getElementById('data-menu');
+            if (!menu) return;
+            dataMenuOpen = menu.classList.contains('hidden');
+            menu.classList.toggle('hidden', !dataMenuOpen);
+        }
+
+        function closeDataMenu() {
+            const menu = document.getElementById('data-menu');
+            if (!menu) return;
+            menu.classList.add('hidden');
+            dataMenuOpen = false;
+        }
+
+        function exportBackupJSON() {
+            closeDataMenu();
+            try {
+                const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `territoryos-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                alert('No se pudo exportar el backup.');
+            }
+        }
+
+        function importBackupJSON(event) {
+            closeDataMenu();
+            const file = event?.target?.files?.[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const imported = JSON.parse(String(reader.result || ''));
+                    if (!imported || typeof imported !== 'object') throw new Error('Formato inválido');
+
+                    if (!Array.isArray(imported.territories) || !Array.isArray(imported.assignments)) {
+                        throw new Error('El backup no tiene la estructura esperada (territories/assignments).');
+                    }
+
+                    // Normalize
+                    const normalized = {
+                        territories: imported.territories,
+                        assignments: imported.assignments,
+                        nextAssignmentId: (typeof imported.nextAssignmentId === 'number')
+                            ? imported.nextAssignmentId
+                            : (imported.assignments.reduce((m, a) => Math.max(m, Number(a?.id) || 0), 0) + 1)
+                    };
+
+                    // Replace state and re-derive fields
+                    state = normalized;
+                    recomputeTerritories(state);
+                    saveState();
+
+                    // Re-render everything
+                    renderDashboard();
+                    renderManagement();
+                    updateStats();
+                    lucide.createIcons();
+
+                    alert('Backup importado ✅');
+                } catch (err) {
+                    alert('No se pudo importar el backup: ' + (err?.message || ''));
+                } finally {
+                    // reset input so user can import same file again
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportAssignmentsCSV() {
+            closeDataMenu();
+            if (!state.assignments || state.assignments.length === 0) {
+                alert('No hay registros para exportar.');
+                return;
+            }
+
+            const territoryNameById = new Map(state.territories.map(t => [t.id, t.name]));
+            const header = ['TerritoryID', 'TerritoryNombre', 'Conductor', 'FechaISO', 'Fecha', 'Estado'];
+
+            const rows = state.assignments.map(a => ([
+                a.territoryId ?? '',
+                territoryNameById.get(a.territoryId) ?? '',
+                a.conductor ?? '',
+                a.fechaISO ?? '',
+                a.fechaLabel ?? '',
+                a.estado ?? ''
+            ]));
+
+            const csv = [
+                header.join(';'),
+                ...rows.map(r => r.map(csvEscape).join(';'))
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `territoryos-registros-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function csvEscape(value) {
+            const s = String(value ?? '');
+            return /[;"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        }
+
+        function clearLocalData() {
+            closeDataMenu();
+            if (!confirm('Esto borrará todos los datos guardados en ESTE navegador. ¿Continuar?')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            state = defaultState();
+            recomputeTerritories(state);
+            saveState();
+            renderDashboard();
+            renderManagement();
+            updateStats();
+            lucide.createIcons();
+        }
+
+function toggleMenu(id, e) {
+            e.stopPropagation();
+            activeMenuId = activeMenuId === id ? null : id;
+            renderManagement();
+        }
+
+        // =========================
+        // View Management
+        // =========================
+        function setView(view) {
+            currentView = view;
+            const dashboard = document.getElementById('view-dashboard');
+            const management = document.getElementById('view-management');
+            const breadcrumb = document.getElementById('breadcrumb');
+            const title = document.getElementById('page-title');
+            const navDash = document.getElementById('nav-dashboard');
+            const navManage = document.getElementById('nav-management');
+
+            if (view === 'dashboard') {
+                dashboard.classList.remove('hidden');
+                management.classList.add('hidden');
+                breadcrumb.classList.add('hidden');
+                title.innerText = 'Panel de Territorios';
+                navDash.classList.add('bg-primary/10', 'text-primary', 'font-medium');
+                navDash.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                navManage.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
+                navManage.classList.add('text-slate-600', 'hover:bg-slate-100');
+            } else {
+                dashboard.classList.add('hidden');
+                management.classList.remove('hidden');
+                breadcrumb.classList.remove('hidden');
+                breadcrumb.classList.add('flex');
+                title.innerText = 'Panel de Control';
+                navManage.classList.add('bg-primary/10', 'text-primary', 'font-medium');
+                navManage.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                navDash.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
+                navDash.classList.add('text-slate-600', 'hover:bg-slate-100');
+            }
+            lucide.createIcons();
+        }
+
+        // =========================
+        // Stats + Rendering
+        // =========================
+        function updateStats() {
+            const total = state.territories.length;
+            const assigned = state.territories.filter(t => t.status === 'assigned').length;
+            const review = state.territories.filter(t => t.status === 'review').length;
+            const inactive = state.territories.filter(t => t.status === 'inactive').length;
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-assigned').innerText = assigned;
+            document.getElementById('stat-review').innerText = review;
+            document.getElementById('stat-inactive').innerText = inactive;
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('territories-grid');
+            grid.innerHTML = '';
+            state.territories.forEach(t => {
+                const statusColor =
+                    t.status === 'assigned' ? 'bg-emerald-500' :
+                    t.status === 'review' ? 'bg-amber-500' :
+                    'bg-slate-300';
+
+                const card = document.createElement('button');
+                card.className = 'bg-white p-3 rounded-lg border border-slate-200 hover:border-primary hover:shadow-md transition-all text-left group';
+                card.onclick = () => {
+                    selectedTerritoryId = t.id;
+                    setView('management');
+                    document.getElementById('territory-selector').value = t.id;
+                    selectTerritory(t.id);
+                };
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-bold text-slate-400 group-hover:text-primary tracking-widest uppercase">ID</span>
+                        <div class="size-2 rounded-full ${statusColor}"></div>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">${t.id}</h3>
+                    <p class="text-[10px] text-slate-500 mt-1">${t.registros || 0} registros</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderManagement() {
+            // Selector
+            const selector = document.getElementById('territory-selector');
+            const current = selector.value || selectedTerritoryId || '';
+            selector.innerHTML = '<option value="">Seleccione ID</option>';
+            state.territories.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.innerText = `Territorio ${t.id}`;
+                selector.appendChild(opt);
+            });
+            selector.value = current;
+
+            // History (FILTER BY TERRITORY)
+            const historyBody = document.getElementById('history-body');
+            historyBody.innerHTML = '';
+
+            const list = selectedTerritoryId
+                ? state.assignments.filter(a => a.territoryId === selectedTerritoryId)
+                : [];
+
+            if (!selectedTerritoryId) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="px-6 py-6 text-sm text-slate-500" colspan="4">Selecciona un territorio para ver sus registros.</td>`;
+                historyBody.appendChild(row);
+                lucide.createIcons();
+                return;
+            }
+
+            if (list.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="px-6 py-6 text-sm text-slate-500" colspan="4">Este territorio todavía no tiene registros.</td>`;
+                historyBody.appendChild(row);
+                lucide.createIcons();
+                return;
+            }
+
+            list.forEach(item => {
+                const statusClass =
+                    item.estado === 'Completado' ? 'bg-green-100 text-green-800' :
+                    item.estado === 'En Progreso' ? 'bg-amber-100 text-amber-800' :
+                    item.estado === 'Sin actividad' ? 'bg-slate-100 text-slate-800' :
+                    'bg-blue-100 text-blue-800'; // En revisión
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50/50 transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                            </div>
+                            <span class="text-sm font-medium text-slate-900">${escapeHtml(item.conductor || '')}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600">${escapeHtml(item.fechaLabel || item.fecha || '')}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium ${statusClass}">
+                            ${escapeHtml(item.estado)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right relative kebab-menu-container">
+                        <button onclick="toggleMenu('${item.id}', event)" class="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors">
+                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                        </button>
+
+                        ${activeMenuId === item.id ? `
+                        <div class="absolute right-6 top-12 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50 py-1 overflow-hidden text-left">
+                            <div class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">Acciones</div>
+                            <button onclick="handleEdit('${item.id}')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                                Editar Registro
+                            </button>
+                            <div class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mt-1">Cambiar Estado</div>
+                            <button onclick="handleStatusChange('${item.id}', 'Completado')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                                <div class="size-1.5 rounded-full bg-emerald-500"></div>
+                                Completado
+                            </button>
+                            <button onclick="handleStatusChange('${item.id}', 'En Progreso')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                                <div class="size-1.5 rounded-full bg-amber-500"></div>
+                                En Progreso
+                            </button>
+                            <button onclick="handleStatusChange('${item.id}', 'Sin actividad')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                                <div class="size-1.5 rounded-full bg-slate-300"></div>
+                                Sin actividad
+                            </button>
+                            <button onclick="handleStatusChange('${item.id}', 'En revisión')" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                                <div class="size-1.5 rounded-full bg-blue-500"></div>
+                                En revisión
+                            </button>
+                            <div class="h-px bg-slate-100 my-1"></div>
+                            <button onclick="handleDelete('${item.id}')" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                        ` : ''}
+                    </td>
+                `;
+                historyBody.appendChild(row);
+            });
+
+            lucide.createIcons();
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        // =========================
+        // Actions
+        // =========================
+        function selectTerritory(id) {
+            selectedTerritoryId = id;
+            const btn = document.getElementById('form-submit-btn');
+            const warning = document.getElementById('form-warning');
+            if (id) {
+                btn.disabled = false;
+                warning.classList.add('hidden');
+                renderManagement();
+            } else {
+                btn.disabled = true;
+                warning.classList.remove('hidden');
+                renderManagement();
+            }
+        }
+
+        function handleAssignmentSubmit(e) {
+            e.preventDefault();
+            if (!selectedTerritoryId) return;
+
+            const conductor = document.getElementById('form-conductor').value.trim();
+            const fechaVal = document.getElementById('form-fecha').value;
+            const completado = document.getElementById('form-completado').checked;
+
+            if (!conductor || !fechaVal) return;
+
+            const date = new Date(fechaVal + 'T00:00:00');
+            const fechaLabel = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            const newAssignment = {
+                id: String(state.nextAssignmentId++),
+                territoryId: selectedTerritoryId,
+                conductor,
+                fechaISO: fechaVal,
+                fechaLabel,
+                estado: completado ? 'Completado' : 'En Progreso'
+            };
+
+            state.assignments = [newAssignment, ...state.assignments];
+
+            // recompute derived fields and persist
+            recomputeTerritories(state);
+            saveState();
+
+            // Reset form
+            document.getElementById('assignment-form').reset();
+
+            // Re-render
+            renderDashboard();
+            renderManagement();
+            updateStats();
+            document.getElementById('territory-selector').value = selectedTerritoryId;
+        }
+
+        function handleStatusChange(id, newStatus) {
+            state.assignments = state.assignments.map(item =>
+                item.id === id ? { ...item, estado: newStatus } : item
+            );
+            recomputeTerritories(state);
+            saveState();
+            activeMenuId = null;
+
+            renderDashboard();
+            renderManagement();
+            updateStats();
+        }
+
+        function handleDelete(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) return;
+
+            state.assignments = state.assignments.filter(item => item.id !== id);
+            recomputeTerritories(state);
+            saveState();
+            activeMenuId = null;
+
+            renderDashboard();
+            renderManagement();
+            updateStats();
+        }
+
+        function handleEdit(id) {
+            const item = state.assignments.find(i => i.id === id);
+            if (!item) return;
+
+            const newConductor = prompt('Nombre del Conductor:', item.conductor);
+            if (newConductor === null) return;
+
+            const newFecha = prompt('Fecha (YYYY-MM-DD):', item.fechaISO || '');
+            if (newFecha === null) return;
+
+            // best-effort date label
+            let fechaISO = item.fechaISO;
+            let fechaLabel = item.fechaLabel || item.fecha || '';
+            if (newFecha.trim()) {
+                fechaISO = newFecha.trim();
+                const d = new Date(fechaISO + 'T00:00:00');
+                if (!isNaN(d.getTime())) {
+                    fechaLabel = d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+                } else {
+                    fechaLabel = newFecha.trim();
+                }
+            }
+
+            state.assignments = state.assignments.map(i =>
+                i.id === id ? { ...i, conductor: newConductor.trim() || i.conductor, fechaISO, fechaLabel } : i
+            );
+
+            recomputeTerritories(state);
+            saveState();
+            activeMenuId = null;
+
+            renderDashboard();
+            renderManagement();
+            updateStats();
+        }
+
+        function openTerritoryModal() {
+            document.getElementById('next-territory-id').innerText = (state.territories.length + 1).toString().padStart(2, '0');
+            document.getElementById('territory-modal').classList.remove('hidden');
+            document.getElementById('territory-modal').classList.add('flex');
+        }
+
+        function closeTerritoryModal() {
+            document.getElementById('territory-modal').classList.add('hidden');
+            document.getElementById('territory-modal').classList.remove('flex');
+        }
+
+        function confirmAddTerritory() {
+            const nextId = (state.territories.length + 1).toString().padStart(2, '0');
+            state.territories = [...state.territories, { id: nextId, status: 'inactive', registros: 0 }];
+            recomputeTerritories(state);
+            saveState();
+
+            closeTerritoryModal();
+            renderDashboard();
+            renderManagement();
+            updateStats();
+        }
+
+        // Start
+        window.onload = init;
+    </script></script>
+</body>
+</html>
