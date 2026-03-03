@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -27,6 +30,28 @@
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #cbd5e1;
+        }
+        /* Estilos para la tabla S-13-S en pantalla */
+        .s13s-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            background: white;
+        }
+        .s13s-table th, .s13s-table td {
+            border: 1px solid #000;
+            padding: 4px;
+            text-align: center;
+        }
+        .s13s-table th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+        }
+        .s13s-header-main {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
         }
     </style>
     <script>
@@ -63,7 +88,8 @@
                         <i data-lucide="map" class="w-5 h-5"></i>
                         <span class="text-sm">Territorios</span>
                     </button>
-                    <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100">
+                    <!-- MODIFICADO: Agregado id y onclick para Analíticas -->
+                    <button onclick="setView('analytics')" id="nav-analytics" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100">
                         <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                         <span class="text-sm">Analíticas</span>
                     </button>
@@ -269,6 +295,32 @@
                                     <span class="bg-white/90 px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">Vista Previa de Mapa</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODIFICADO: Nueva Vista de Analíticas -->
+                <div id="view-analytics" class="hidden space-y-8 max-w-6xl mx-auto">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div>
+                            <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Analíticas de Territorio</h2>
+                            <p class="text-slate-500 mt-1">Generación de reportes basados en el formulario S-13-S.</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="renderAnalytics()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                VER
+                            </button>
+                            <button onclick="generateAnalyticsPDF()" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                Generar PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-8">
+                        <div id="analytics-container" class="overflow-x-auto custom-scrollbar">
+                            <p class="text-slate-500 text-center py-12">Haz clic en "VER" para generar la vista previa del reporte.</p>
                         </div>
                     </div>
                 </div>
@@ -562,30 +614,44 @@ function toggleMenu(id, e) {
             currentView = view;
             const dashboard = document.getElementById('view-dashboard');
             const management = document.getElementById('view-management');
+            const analytics = document.getElementById('view-analytics');
             const breadcrumb = document.getElementById('breadcrumb');
             const title = document.getElementById('page-title');
             const navDash = document.getElementById('nav-dashboard');
             const navManage = document.getElementById('nav-management');
+            const navAnalytics = document.getElementById('nav-analytics');
+
+            // Reset all
+            dashboard.classList.add('hidden');
+            management.classList.add('hidden');
+            analytics.classList.add('hidden');
+            navDash.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
+            navDash.classList.add('text-slate-600', 'hover:bg-slate-100');
+            navManage.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
+            navManage.classList.add('text-slate-600', 'hover:bg-slate-100');
+            navAnalytics.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
+            navAnalytics.classList.add('text-slate-600', 'hover:bg-slate-100');
 
             if (view === 'dashboard') {
                 dashboard.classList.remove('hidden');
-                management.classList.add('hidden');
                 breadcrumb.classList.add('hidden');
                 title.innerText = 'Panel de Territorios';
                 navDash.classList.add('bg-primary/10', 'text-primary', 'font-medium');
                 navDash.classList.remove('text-slate-600', 'hover:bg-slate-100');
-                navManage.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
-                navManage.classList.add('text-slate-600', 'hover:bg-slate-100');
-            } else {
-                dashboard.classList.add('hidden');
+            } else if (view === 'management') {
                 management.classList.remove('hidden');
                 breadcrumb.classList.remove('hidden');
                 breadcrumb.classList.add('flex');
                 title.innerText = 'Panel de Control';
                 navManage.classList.add('bg-primary/10', 'text-primary', 'font-medium');
                 navManage.classList.remove('text-slate-600', 'hover:bg-slate-100');
-                navDash.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
-                navDash.classList.add('text-slate-600', 'hover:bg-slate-100');
+            } else if (view === 'analytics') {
+                analytics.classList.remove('hidden');
+                breadcrumb.classList.remove('hidden');
+                breadcrumb.classList.add('flex');
+                title.innerText = 'Analíticas';
+                navAnalytics.classList.add('bg-primary/10', 'text-primary', 'font-medium');
+                navAnalytics.classList.remove('text-slate-600', 'hover:bg-slate-100');
             }
             lucide.createIcons();
         }
@@ -737,6 +803,175 @@ function toggleMenu(id, e) {
             });
 
             lucide.createIcons();
+        }
+
+        // =========================
+        // MODIFICADO: Funciones de Analíticas
+        // =========================
+        function getAnalyticsData() {
+            // Filtrar territorios con al menos un registro y ordenar por ID
+            const activeTerritories = state.territories
+                .filter(t => state.assignments.some(a => a.territoryId === t.id))
+                .sort((a, b) => a.id.localeCompare(b.id));
+
+            const reportData = [];
+
+            activeTerritories.forEach(t => {
+                const territoryAssignments = state.assignments
+                    .filter(a => a.territoryId === t.id)
+                    .sort((a, b) => new Date(a.fechaISO) - new Date(b.fechaISO));
+
+                // Obtener la última fecha de completado
+                const completedAssignments = territoryAssignments.filter(a => a.estado === 'Completado');
+                const lastCompletedDate = completedAssignments.length > 0 
+                    ? completedAssignments[completedAssignments.length - 1].fechaISO 
+                    : '';
+
+                // Dividir asignaciones en bloques de 4
+                for (let i = 0; i < territoryAssignments.length; i += 4) {
+                    const chunk = territoryAssignments.slice(i, i + 4);
+                    reportData.push({
+                        id: t.id,
+                        lastCompleted: i === 0 ? lastCompletedDate : '', // Solo mostrar en la primera fila del territorio
+                        assignments: chunk
+                    });
+                }
+            });
+
+            return reportData;
+        }
+
+        function renderAnalytics() {
+            const container = document.getElementById('analytics-container');
+            const data = getAnalyticsData();
+
+            if (data.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-center py-12">No hay datos suficientes para generar el reporte. Asegúrate de tener territorios con registros.</p>';
+                return;
+            }
+
+            let html = `
+                <div class="s13s-header-main uppercase">REGISTRO DE ASIGNACIÓN DE TERRITORIO</div>
+                <div class="mb-4 text-sm">Año de servicio: <span class="border-b border-black px-4">${new Date().getFullYear()}</span></div>
+                <table class="s13s-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 50px;">Núm. de terr.</th>
+                            <th rowspan="2" style="width: 80px;">Última fecha en que se completó</th>
+                            <th colspan="2">Asignado a</th>
+                            <th colspan="2">Asignado a</th>
+                            <th colspan="2">Asignado a</th>
+                            <th colspan="2">Asignado a</th>
+                        </tr>
+                        <tr>
+                            <th>Fecha en que se asignó</th>
+                            <th>Fecha en que se completó</th>
+                            <th>Fecha en que se asignó</th>
+                            <th>Fecha en que se completó</th>
+                            <th>Fecha en que se asignó</th>
+                            <th>Fecha en que se completó</th>
+                            <th>Fecha en que se asignó</th>
+                            <th>Fecha en que se completó</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(row => {
+                html += `<tr>
+                    <td>${row.id}</td>
+                    <td>${row.lastCompleted}</td>
+                `;
+
+                for (let i = 0; i < 4; i++) {
+                    const assign = row.assignments[i];
+                    if (assign) {
+                        html += `
+                            <td>${assign.conductor}<br><span class="text-[8px]">${assign.fechaISO}</span></td>
+                            <td>${assign.estado === 'Completado' ? assign.fechaISO : ''}</td>
+                        `;
+                    } else {
+                        html += `<td></td><td></td>`;
+                    }
+                }
+                html += `</tr>`;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+                <p class="text-[8px] mt-2 italic">*Cuando comience una nueva página, anote en esta columna la última fecha en que los territorios se completaron.</p>
+                <p class="text-[8px] mt-1">S-13-S 1/22</p>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        async function generateAnalyticsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+            const data = getAnalyticsData();
+
+            if (data.length === 0) {
+                alert('No hay datos para generar el PDF.');
+                return;
+            }
+
+            // Título y Año
+            doc.setFontSize(16);
+            doc.text('REGISTRO DE ASIGNACIÓN DE TERRITORIO', 148.5, 20, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text(`Año de servicio: ${new Date().getFullYear()}`, 20, 30);
+
+            // Preparar filas para autoTable
+            const tableRows = data.map(row => {
+                const cols = [row.id, row.lastCompleted];
+                for (let i = 0; i < 4; i++) {
+                    const assign = row.assignments[i];
+                    if (assign) {
+                        cols.push(`${assign.conductor}\n(${assign.fechaISO})`);
+                        cols.push(assign.estado === 'Completado' ? assign.fechaISO : '');
+                    } else {
+                        cols.push('', '');
+                    }
+                }
+                return cols;
+            });
+
+            doc.autoTable({
+                startY: 35,
+                head: [
+                    [
+                        { content: 'Núm. de terr.', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+                        { content: 'Última fecha en que se completó', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
+                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
+                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
+                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } }
+                    ],
+                    [
+                        'Fecha en que se asignó', 'Fecha en que se completó',
+                        'Fecha en que se asignó', 'Fecha en que se completó',
+                        'Fecha en que se asignó', 'Fecha en que se completó',
+                        'Fecha en que se asignó', 'Fecha en que se completó'
+                    ]
+                ],
+                body: tableRows,
+                theme: 'grid',
+                styles: { fontSize: 7, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.1 },
+                headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                columnStyles: {
+                    0: { cellWidth: 15 },
+                    1: { cellWidth: 25 }
+                }
+            });
+
+            const finalY = doc.lastAutoTable.finalY + 5;
+            doc.setFontSize(6);
+            doc.text('*Cuando comience una nueva página, anote en esta columna la última fecha en que los territorios se completaron.', 20, finalY);
+            doc.text('S-13-S 1/22', 20, finalY + 4);
+
+            doc.save(`S-13-S-TerritoryOS-${new Date().toISOString().slice(0, 10)}.pdf`);
         }
 
         function escapeHtml(str) {
@@ -891,6 +1126,6 @@ function toggleMenu(id, e) {
 
         // Start
         window.onload = init;
-    </script></script>
+    </script>
 </body>
 </html>
