@@ -80,6 +80,11 @@
                 </div>
                 
                 <nav class="space-y-1">
+                    <button onclick="setView('schedule')" id="nav-schedule"
+  class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100">
+  <i data-lucide="calendar-days" class="w-5 h-5"></i>
+  <span class="text-sm">Programa</span>
+</button>
                     <button onclick="setView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 bg-primary/10 text-primary font-medium">
                         <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                         <span class="text-sm">Dashboard</span>
@@ -219,7 +224,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <!-- Assignment Form -->
                         <div class="lg:col-span-1">
-                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-visible">
                                 <div class="p-6 border-b border-slate-200 bg-slate-50/50">
                                     <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                                         <i data-lucide="user-plus" class="w-5 h-5 text-primary"></i>
@@ -262,7 +267,7 @@
 
                         <!-- History & Map -->
                         <div class="lg:col-span-2 space-y-6">
-                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-visible">
                                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
                                     <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                                         <i data-lucide="history" class="w-5 h-5 text-primary"></i>
@@ -300,7 +305,117 @@
                         </div>
                     </div>
                 </div>
+<!-- ✅ NUEVO: Programa Semanal View (vacía por ahora) -->
+<div id="view-schedule" class="hidden space-y-6 max-w-6xl mx-auto">
 
+  <div>
+    <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Programa semanal</h2>
+    <p class="text-slate-500 mt-1">
+      Acá vamos a cargar la semana anterior, actual y siguiente, y luego sincronizar con territorios.
+    </p>
+  </div>
+
+
+  <!-- SELECTOR DE SEMANA -->
+  <div class="bg-white border border-slate-200 rounded-xl p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+      <div>
+        <div class="text-slate-900 font-semibold">Semana</div>
+        <div id="schedule-week-label" class="text-slate-500 text-sm">Semana actual</div>
+      </div>
+
+      <div class="inline-flex rounded-lg border border-slate-200 overflow-hidden">
+        <button id="btn-week-prev" onclick="setScheduleWeek('previous')"
+          class="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          Anterior
+        </button>
+
+        <button id="btn-week-current" onclick="setScheduleWeek('current')"
+          class="px-4 py-2 text-sm font-semibold bg-primary/10 text-primary">
+          Actual
+        </button>
+
+        <button id="btn-week-next" onclick="setScheduleWeek('next')"
+          class="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          Siguiente
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ESTADO -->
+ <!-- TABLA DEL PROGRAMA -->
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+  <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+      <div class="text-slate-900 font-semibold">Salidas</div>
+      <div id="schedule-sync-badge" class="text-xs text-slate-500">Sincronización: pendiente</div>
+    </div>
+
+      <!-- ✅ NUEVO: Nueva semana -->
+  <button onclick="newWeek()"
+    class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 flex items-center gap-2">
+    <i data-lucide="skip-forward" class="w-4 h-4"></i>
+    Nueva semana
+  </button>
+
+    <div class="flex gap-2">
+      <button onclick="addScheduleRow()"
+        class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 flex items-center gap-2">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Agregar salida
+      </button>
+
+      <button onclick="syncCurrentSchedule()"
+        class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 flex items-center gap-2">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        Sincronizar
+      </button>
+
+       <!-- ✅ NUEVO: Semana lunes + Autocompletar -->
+  <div class="flex items-center gap-2 ml-auto">
+    <input id="week-start" type="date"
+      class="rounded-lg border-slate-300 text-sm px-2 py-2"
+      title="Elegí el lunes de la semana" />
+    <button onclick="autoFillWeekDates()"
+      class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 flex items-center gap-2">
+      <i data-lucide="calendar-check" class="w-4 h-4"></i>
+      Auto completar
+    </button>
+  </div>
+
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Día</th>
+          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fecha</th>
+          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Hora</th>
+          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Lugar</th>
+          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Territorios</th>
+          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Conduce</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+
+      <tbody id="schedule-body" class="divide-y divide-slate-100">
+        <tr>
+          <td class="px-4 py-6 text-sm text-slate-500" colspan="7">
+            No hay salidas cargadas en esta semana.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
                 <!-- MODIFICADO: Nueva Vista de Analíticas -->
                 <div id="view-analytics" class="hidden space-y-8 max-w-6xl mx-auto">
                     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -320,7 +435,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-8">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-visible p-8">
                         <div id="analytics-container" class="overflow-x-auto custom-scrollbar">
                             <p class="text-slate-500 text-center py-12">Haz clic en "VER" para generar la vista previa del reporte.</p>
                         </div>
@@ -365,7 +480,6 @@
 
         // App state (single source of truth)
         let state = loadState();
-
         // UI state
         let selectedTerritoryId = null;
         let currentView = 'dashboard';
@@ -443,14 +557,16 @@
         // =========================
         // Init
         // =========================
-        function init() {
-            recomputeTerritories(state);
-            renderDashboard();
-            renderManagement();
-            updateStats();
-            lucide.createIcons();
-        }
+     function init() {
+  loadSchedule();          // <-- AGREGAR ESTO
+  setScheduleWeek('current'); // <-- opcional pero recomendado (renderiza tabla/badge)
 
+  recomputeTerritories(state);
+  renderDashboard();
+  renderManagement();
+  updateStats();
+  lucide.createIcons();
+}
         // Close menu on outside click
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.kebab-menu-container')) closeMenu();
@@ -617,6 +733,7 @@ function toggleMenu(id, e) {
             const dashboard = document.getElementById('view-dashboard');
             const management = document.getElementById('view-management');
             const analytics = document.getElementById('view-analytics');
+            const schedule = document.getElementById('view-schedule'); // para las salidas
             const breadcrumb = document.getElementById('breadcrumb');
             const title = document.getElementById('page-title');
             const navDash = document.getElementById('nav-dashboard');
@@ -627,6 +744,7 @@ function toggleMenu(id, e) {
             dashboard.classList.add('hidden');
             management.classList.add('hidden');
             analytics.classList.add('hidden');
+            schedule.classList.add('hidden'); // oculta las salidas cuando se cambia de ventana
             navDash.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
             navDash.classList.add('text-slate-600', 'hover:bg-slate-100');
             navManage.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
@@ -654,7 +772,21 @@ function toggleMenu(id, e) {
                 title.innerText = 'Analíticas';
                 navAnalytics.classList.add('bg-primary/10', 'text-primary', 'font-medium');
                 navAnalytics.classList.remove('text-slate-600', 'hover:bg-slate-100');
-            }
+            }            else if (view === 'schedule') {
+    schedule.classList.remove('hidden');
+    breadcrumb.classList.remove('hidden');
+    breadcrumb.classList.add('flex');
+    title.innerText = 'Programa semanal';
+
+    // Reset nav styles
+    navDash.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
+    navManage.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
+    navAnalytics.classList.remove('bg-primary/10', 'text-primary', 'font-medium');
+
+    const navSchedule = document.getElementById('nav-schedule');
+    navSchedule.classList.add('bg-primary/10', 'text-primary', 'font-medium');
+    navSchedule.classList.remove('text-slate-600', 'hover:bg-slate-100');
+}
             lucide.createIcons();
         }
 
@@ -1128,6 +1260,457 @@ function toggleMenu(id, e) {
 
         // Start
         window.onload = init;
+
+// Convierte texto de territorios a lista de IDs ("01".."99")
+// Reglas:
+// - "SN" => null (no sincroniza)
+// - "10-15" (sin espacios) => rango 10..15
+// - "10 - 15" (con espacios) => lista [10, 15]
+// - separadores: y, , ; / | -
+function parseTerritoriesInput(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return [];
+  if (s.toUpperCase() === 'SN') return null;
+
+  // Detectar rango "10-15" (sin espacios)
+  const mRange = s.match(/^(\d{1,2})-(\d{1,2})$/);
+  if (mRange) {
+    let a = parseInt(mRange[1], 10);
+    let b = parseInt(mRange[2], 10);
+    if (Number.isNaN(a) || Number.isNaN(b)) return [];
+    if (a > b) [a, b] = [b, a];
+    const out = [];
+    for (let i = a; i <= b; i++) out.push(String(i).padStart(2, '0'));
+    return out;
+  }
+
+  // Normalizar: reemplazar " y " por separador
+  const normalized = s
+    .replace(/\s+y\s+/gi, ',')
+    .replace(/[;|/]/g, ',')
+    .replace(/\s*-\s*/g, ','); // guión con espacios => lista
+
+  const parts = normalized.split(',').map(x => x.trim()).filter(Boolean);
+  const ids = [];
+  for (const p of parts) {
+    const n = parseInt(p, 10);
+    if (!Number.isNaN(n) && n > 0) ids.push(String(n).padStart(2, '0'));
+  }
+  // únicos, orden asc numérico
+  return Array.from(new Set(ids)).sort((a,b) => Number(a) - Number(b));
+}
+
+// Genera "id único" para cada salida del programa
+function makeScheduleEventId() {
+  return 'evt_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36);
+}
+
+// Sincroniza una lista de salidas hacia state.assignments (sin duplicar)
+function syncScheduleToAssignments(scheduleEvents) {
+  // scheduleEvents: [{ id, dateISO, time, place, territoriesText, conductor, ... }]
+
+  // Índice de duplicados ya existentes: sourceId + territoryId
+  const existing = new Set(
+    (state.assignments || [])
+      .filter(a => a?.source === 'schedule' && a?.sourceId && a?.territoryId)
+      .map(a => `${a.sourceId}::${a.territoryId}`)
+  );
+
+  let inserted = 0;
+  for (const ev of (scheduleEvents || [])) {
+    if (!ev) continue;
+    const territoryIds = parseTerritoriesInput(ev.territoriesText);
+    if (territoryIds === null) continue; // SN => no sincroniza
+    if (!territoryIds.length) continue;
+
+    const conductor = String(ev.conductor || '').trim();
+    const fechaISO = String(ev.dateISO || '').trim();
+    if (!conductor || !fechaISO) continue;
+
+    // label legible
+    const d = new Date(fechaISO + 'T00:00:00');
+    const fechaLabel = isNaN(d.getTime())
+      ? fechaISO
+      : d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    for (const tid of territoryIds) {
+      const key = `${ev.id}::${tid}`;
+      if (existing.has(key)) continue;
+
+      state.assignments.unshift({
+        id: String(state.nextAssignmentId++),
+        territoryId: tid,
+        conductor,
+        fechaISO,
+        fechaLabel,
+        estado: 'En Progreso',
+        source: 'schedule',
+        sourceId: ev.id
+      });
+
+      existing.add(key);
+      inserted++;
+    }
+  }
+
+  recomputeTerritories(state);
+  saveState();
+  renderDashboard();
+  renderManagement();
+  updateStats();
+  if (currentView === 'analytics') renderAnalytics();
+
+  return inserted;
+}
+// ================================
+// PROGRAMA SEMANAL (UI BASE)
+// ================================
+let scheduleWeek = 'current';
+
+// Semana en memoria (por ahora). Luego lo guardamos en state.schedule (3 semanas)
+const scheduleData = {
+  previous: { rows: [], synced: true },
+  current: { rows: [], synced: true },
+  next: { rows: [], synced: true },
+};
+
+function setScheduleWeek(week) {
+  scheduleWeek = week;
+
+  const label = document.getElementById('schedule-week-label');
+  if (label) {
+    label.textContent =
+      week === 'previous' ? 'Semana anterior' :
+      week === 'next' ? 'Semana siguiente' :
+      'Semana actual';
+  }
+
+  // estilos botones
+  const btnPrev = document.getElementById('btn-week-prev');
+  const btnCur = document.getElementById('btn-week-current');
+  const btnNext = document.getElementById('btn-week-next');
+
+  const reset = (btn) => {
+    if (!btn) return;
+    btn.classList.remove('bg-primary/10', 'text-primary');
+    btn.classList.add('text-slate-700');
+  };
+  const active = (btn) => {
+    if (!btn) return;
+    btn.classList.add('bg-primary/10', 'text-primary');
+    btn.classList.remove('text-slate-700');
+  };
+
+  reset(btnPrev); reset(btnCur); reset(btnNext);
+  if (week === 'previous') active(btnPrev);
+  else if (week === 'next') active(btnNext);
+  else active(btnCur);
+
+  renderScheduleTable();
+  updateScheduleSyncBadge();
+  lucide.createIcons();
+}
+
+function markScheduleDirty() {
+  scheduleData[scheduleWeek].synced = false;
+  updateScheduleSyncBadge();
+}
+
+function updateScheduleSyncBadge() {
+  const badge = document.getElementById('schedule-sync-badge');
+  if (!badge) return;
+
+  const synced = scheduleData[scheduleWeek].synced;
+  badge.textContent = synced ? 'Sincronización: al día ✅' : 'Sincronización: pendiente ⚠️';
+  badge.className = synced
+    ? 'text-xs text-emerald-700'
+    : 'text-xs text-amber-700';
+}
+
+function addScheduleRow() {
+  const row = {
+    id: makeScheduleEventId(), // ya la tenés por lo de sync
+    day: 'Lunes',
+    dateISO: '',
+    time: '',
+    place: '',
+    territoriesText: '',
+    conductor: ''
+  };
+  scheduleData[scheduleWeek].rows.push(row);
+markScheduleDirty();
+saveSchedule();
+renderScheduleTable();
+}
+
+function deleteScheduleRow(rowId) {
+  scheduleData[scheduleWeek].rows =
+    scheduleData[scheduleWeek].rows.filter(r => r.id !== rowId);
+
+  markScheduleDirty();
+  saveSchedule();
+  renderScheduleTable();
+  lucide.createIcons();
+}
+
+function updateScheduleField(rowId, field, value) {
+  const rows = scheduleData[scheduleWeek].rows;
+  const idx = rows.findIndex(r => r.id === rowId);
+  if (idx === -1) return;
+
+  rows[idx][field] = value;
+
+  markScheduleDirty();
+  saveSchedule();
+}
+
+function renderScheduleTable() {
+  const body = document.getElementById('schedule-body');
+  if (!body) return;
+
+  const rows = scheduleData[scheduleWeek].rows;
+
+  if (!rows.length) {
+    body.innerHTML = `
+      <tr>
+        <td class="px-4 py-6 text-sm text-slate-500" colspan="7">
+          No hay salidas cargadas en esta semana.
+        </td>
+      </tr>`;
+    return;
+  }
+
+  const dayOptions = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo']
+    .map(d => `<option value="${d}">${d}</option>`).join('');
+
+  body.innerHTML = rows.map(r => `
+    <tr class="hover:bg-slate-50/50">
+      <td class="px-4 py-3">
+        <select class="rounded-lg border-slate-300 bg-white text-sm px-2 py-1"
+          onchange="updateScheduleField('${r.id}','day',this.value)">
+          ${dayOptions.replace(`value="${r.day}"`, `value="${r.day}" selected`)}
+        </select>
+      </td>
+
+      <td class="px-4 py-3">
+        <input type="date" class="rounded-lg border-slate-300 text-sm px-2 py-1 w-40"
+          value="${escapeHtml(r.dateISO || '')}"
+          onchange="updateScheduleField('${r.id}','dateISO',this.value)">
+      </td>
+
+      <td class="px-4 py-3">
+        <input type="time" class="rounded-lg border-slate-300 text-sm px-2 py-1 w-28"
+          value="${escapeHtml(r.time || '')}"
+          onchange="updateScheduleField('${r.id}','time',this.value)">
+      </td>
+
+      <td class="px-4 py-3">
+        <input type="text" class="rounded-lg border-slate-300 text-sm px-2 py-1 w-64"
+          placeholder="Lugar de encuentro"
+          value="${escapeHtml(r.place || '')}"
+          onchange="updateScheduleField('${r.id}','place',this.value)">
+      </td>
+
+      <td class="px-4 py-3">
+        <input type="text" class="rounded-lg border-slate-300 text-sm px-2 py-1 w-36"
+          placeholder="10 y 11 / 4-50-56 / SN"
+          value="${escapeHtml(r.territoriesText || '')}"
+          onchange="updateScheduleField('${r.id}','territoriesText',this.value)">
+      </td>
+
+      <td class="px-4 py-3">
+        <input type="text" class="rounded-lg border-slate-300 text-sm px-2 py-1 w-48"
+          placeholder="Conduce"
+          value="${escapeHtml(r.conductor || '')}"
+          onchange="updateScheduleField('${r.id}','conductor',this.value)">
+      </td>
+
+      <td class="px-4 py-3 text-right">
+        <button onclick="deleteScheduleRow('${r.id}')"
+          class="text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-semibold">
+          Eliminar
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function syncCurrentSchedule() {
+  const weekObj = scheduleData[scheduleWeek];
+  const events = (weekObj?.rows || []);
+
+  if (!events.length) {
+    alert('No hay salidas cargadas para sincronizar.');
+    return;
+  }
+
+  // Contar válidas / omitidas (para feedback)
+  let candidates = 0;
+  let skippedSN = 0;
+  let skippedMissing = 0;
+
+  for (const ev of events) {
+    if (!ev) continue;
+
+    const terr = parseTerritoriesInput(ev.territoriesText);
+    if (terr === null) { // SN
+      skippedSN++;
+      continue;
+    }
+
+    const conductor = String(ev.conductor || '').trim();
+    const fechaISO = String(ev.dateISO || '').trim();
+
+    if (!conductor || !fechaISO || !terr || terr.length === 0) {
+      skippedMissing++;
+      continue;
+    }
+
+    candidates++;
+  }
+
+  if (candidates === 0) {
+    alert(
+      'No hay salidas válidas para sincronizar.\n\n' +
+      `Omitidas por SN: ${skippedSN}\n` +
+      `Omitidas por datos faltantes: ${skippedMissing}\n\n` +
+      'Revisá que cada salida tenga Fecha, Conduce y Territorios (y que no sea SN).'
+    );
+    return;
+  }
+
+  // ✅ Sincronización real (crea registros por cada territorio)
+  const inserted = syncScheduleToAssignments(events);
+
+  // Marcar semana como sincronizada
+  weekObj.synced = true;
+  saveSchedule();
+  updateScheduleSyncBadge();
+
+  alert(
+    `Sincronización lista ✅\n\n` +
+    `Registros creados: ${inserted}\n` +
+    `Omitidas por SN: ${skippedSN}\n` +
+    `Omitidas por datos faltantes: ${skippedMissing}\n\n` +
+    `Tip: si sincronizás dos veces, NO duplica.`
+  );
+}
+function saveSchedule() {
+  localStorage.setItem('territoryos_schedule', JSON.stringify(scheduleData));
+}
+
+function loadSchedule() {
+  const raw = localStorage.getItem('territoryos_schedule');
+  if (!raw) return;
+
+  try {
+    const parsed = JSON.parse(raw);
+
+    if (parsed.previous && parsed.current && parsed.next) {
+      scheduleData.previous = parsed.previous;
+      scheduleData.current = parsed.current;
+      scheduleData.next = parsed.next;
+    }
+  } catch(e) {
+    console.warn('Error cargando programa semanal', e);
+  }
+}
+
+function newWeek() {
+  // Vamos a “borrar” la previous al rotar.
+  // Si previous no está sincronizada, avisamos.
+  if (scheduleData.previous && scheduleData.previous.synced === false) {
+    const ok = confirm(
+      "⚠️ La semana anterior NO está sincronizada.\n" +
+      "Si continuás, se perderán esas salidas.\n\n" +
+      "¿Querés continuar igual?"
+    );
+    if (!ok) return;
+  }
+
+  // Rotación: previous ← current, current ← next, next ← vacío
+  scheduleData.previous = scheduleData.current;
+  scheduleData.current = scheduleData.next;
+  scheduleData.next = { rows: [], synced: true };
+
+  saveSchedule();
+
+  // Nos movemos a la semana actual para que sea intuitivo
+  setScheduleWeek('current');
+
+  alert("Nueva semana creada ✅ (anterior/actual/siguiente rotadas)");
+}
+function dayOffsetFromMonday(dayName) {
+  const map = {
+    'Lunes': 0,
+    'Martes': 1,
+    'Miércoles': 2,
+    'Jueves': 3,
+    'Viernes': 4,
+    'Sábado': 5,
+    'Domingo': 6,
+  };
+  return map[dayName] ?? null;
+}
+
+function toISODate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function autoFillWeekDates() {
+  const input = document.getElementById('week-start');
+  if (!input || !input.value) {
+    alert("Elegí primero la fecha de inicio (idealmente el lunes).");
+    return;
+  }
+
+  // Tomamos la fecha elegida y la ajustamos al lunes de esa semana
+  const picked = new Date(input.value + 'T00:00:00');
+  if (isNaN(picked.getTime())) {
+    alert("Fecha inválida.");
+    return;
+  }
+
+  // JS: 0=Dom,1=Lun,2=Mar... Queremos llevarlo al lunes.
+  const jsDay = picked.getDay();
+  const diffToMonday = (jsDay + 6) % 7; // Lun=>0, Mar=>1, Dom=>6
+  const monday = new Date(picked);
+  monday.setDate(picked.getDate() - diffToMonday);
+
+  // Aplicar a filas
+  const rows = scheduleData[scheduleWeek].rows || [];
+  if (!rows.length) {
+    alert("No hay salidas cargadas en esta semana.");
+    return;
+  }
+
+  let changed = 0;
+  for (const r of rows) {
+    const off = dayOffsetFromMonday(r.day);
+    if (off === null) continue;
+
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + off);
+
+    const iso = toISODate(d);
+    if (r.dateISO !== iso) {
+      r.dateISO = iso;
+      changed++;
+    }
+  }
+
+  if (changed > 0) {
+    markScheduleDirty();
+    saveSchedule();
+    renderScheduleTable();
+    lucide.createIcons();
+  }
+
+  alert(`Fechas completadas ✅ (${changed} salidas actualizadas)`);
+}
     </script>
 </body>
 </html>
