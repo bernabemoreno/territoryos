@@ -1088,18 +1088,11 @@ function toggleMenu(id, e) {
         // =========================
         // MODIFICADO: Funciones de Analíticas
         // =========================
-        
-        function compareTerritoryIds(a, b) {
-            const aId = String(a.id ?? '');
-            const bId = String(b.id ?? '');
-            return aId.localeCompare(bId, 'es', { numeric: true, sensitivity: 'base' });
-        }
-
-function getAnalyticsData() {
+        function getAnalyticsData() {
             // Filtrar territorios con al menos un registro y ordenar por ID
             const activeTerritories = state.territories
                 .filter(t => state.assignments.some(a => a.territoryId === t.id))
-                .sort(compareTerritoryIds);
+                .sort((a, b) => a.id.localeCompare(b.id));
 
             const reportData = [];
 
@@ -1194,9 +1187,8 @@ function getAnalyticsData() {
             container.innerHTML = html;
         }
 
-        
-        async function generateAnalyticsPDF() {
-            // Genera un "PDF" usando la impresión del navegador (más fiel al formulario).
+                async function generateAnalyticsPDF() {
+            // Genera el PDF usando la impresión del navegador (más fiel a la plantilla).
             // El usuario elige "Guardar como PDF" en el diálogo de impresión.
             const data = getAnalyticsData();
             if (data.length === 0) {
@@ -1204,13 +1196,10 @@ function getAnalyticsData() {
                 return;
             }
 
-            // Reutilizamos el mismo HTML de vista previa para que salga idéntico
-            // (si aún no está renderizado, lo renderizamos).
+            // Asegura que la vista esté renderizada con el filtro actual
+            renderAnalytics();
             const container = document.getElementById('analytics-container');
-            if (!container || !container.querySelector('table')) {
-                renderAnalytics();
-            }
-            const reportHtml = (container ? container.innerHTML : '');
+            const reportHtml = container ? container.innerHTML : '';
 
             const win = window.open('', '_blank', 'noopener,noreferrer');
             if (!win) {
@@ -1222,32 +1211,30 @@ function getAnalyticsData() {
             win.document.write(`<!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>S-13-S - TerritoryOS</title>
-<style>
-  @page { size: A4 landscape; margin: 10mm; }
-  body { font-family: Arial, sans-serif; color:#000; background:#fff; }
-  .s13s-header-main { font-size: 14px; font-weight: bold; margin: 0 0 10px 0; text-align: center; letter-spacing: 0.3px; }
-  .s13s-table { width: 100%; border-collapse: collapse; font-size: 10px; background: white; }
-  .s13s-table th, .s13s-table td { border: 1px solid #000; padding: 4px; text-align: center; vertical-align: middle; }
-  .s13s-table th { background: #f3f4f6; font-weight: bold; }
-  .text-\[8px\] { font-size: 8px; }
-  .italic { font-style: italic; }
-  .uppercase { text-transform: uppercase; }
-  .mb-4 { margin-bottom: 14px; }
-  .mt-2 { margin-top: 10px; }
-  .mt-1 { margin-top: 6px; }
-  .border-b { border-bottom: 1px solid #000; }
-  .px-4 { padding-left: 12px; padding-right: 12px; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>S-13-S - TerritoryOS</title>
+
+  <!-- Para que el HTML quede igual que en la app -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @page { size: A4 landscape; margin: 10mm; }
+    body { background: #fff; }
+    /* Ajustes de impresión */
+    .no-print { display:none !important; }
+    /* Evita que se corte la tabla raro */
+    table, tr, td, th { page-break-inside: avoid; }
+  </style>
 </head>
-<body>
-${reportHtml}
-<script>
-  // Espera a que pinte y abre impresión automáticamente
-  window.addEventListener('load', () => setTimeout(() => window.print(), 200));
-</script>
+<body class="p-4">
+  ${reportHtml}
+  <script>
+    window.addEventListener('load', () => {
+      // Espera un toque a que Tailwind aplique estilos
+      setTimeout(() => window.print(), 250);
+    });
+  <\/script>
 </body>
 </html>`);
             win.document.close();
@@ -2037,7 +2024,7 @@ function printSchedule() {
   // Ajustá estos nombres a los que estés usando realmente:
   const bannerDataUrl =
     localStorage.getItem(SCHEDULE_TEMPLATE_SMALL_KEY) ||
-    scheduleTemplateRAM ||
+    window.scheduleTemplateRAM ||
     '';
 
   const bannerColor =
