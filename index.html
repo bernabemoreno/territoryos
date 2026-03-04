@@ -1092,7 +1092,7 @@ function toggleMenu(id, e) {
             // Filtrar territorios con al menos un registro y ordenar por ID
             const activeTerritories = state.territories
                 .filter(t => state.assignments.some(a => a.territoryId === t.id))
-                .sort((a, b) => a.id.localeCompare(b.id));
+                .sort((a, b) => a.id.localeCompare(b.id, 'es', { numeric: true, sensitivity: 'base' }));
 
             const reportData = [];
 
@@ -1187,57 +1187,71 @@ function toggleMenu(id, e) {
             container.innerHTML = html;
         }
 
-                async function generateAnalyticsPDF() {
-            // Genera el PDF usando la impresión del navegador (más fiel a la plantilla).
-            // El usuario elige "Guardar como PDF" en el diálogo de impresión.
+        async function generateAnalyticsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
             const data = getAnalyticsData();
+
             if (data.length === 0) {
                 alert('No hay datos para generar el PDF.');
                 return;
             }
 
-            // Asegura que la vista esté renderizada con el filtro actual
-            renderAnalytics();
-            const container = document.getElementById('analytics-container');
-            const reportHtml = container ? container.innerHTML : '';
+            // Título y Año
+            doc.setFontSize(16);
+            doc.text('REGISTRO DE ASIGNACIÓN DE TERRITORIO', 148.5, 20, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text(`Año de servicio: ${new Date().getFullYear()}`, 20, 30);
 
-            const win = window.open('', '_blank', 'noopener,noreferrer');
-            if (!win) {
-                alert('No se pudo abrir la ventana de impresión (bloqueada por el navegador). Habilita pop-ups para este sitio.');
-                return;
-            }
+            // Preparar filas para autoTable
+            const tableRows = data.map(row => {
+                const cols = [row.id, row.lastCompleted];
+                for (let i = 0; i < 4; i++) {
+                    const assign = row.assignments[i];
+                    if (assign) {
+                        cols.push(`${assign.conductor}\n(${assign.fechaISO})`);
+                        cols.push(assign.estado === 'Completado' ? assign.fechaISO : '');
+                    } else {
+                        cols.push('', '');
+                    }
+                }
+                return cols;
+            });
 
-            win.document.open();
-            win.document.write(`<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>S-13-S - TerritoryOS</title>
+            doc.autoTable({
+                startY: 35,
+                head: [
+                    [
+                        { content: 'Núm. de terr.', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+                        { content: 'Última fecha en que se completó', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
+                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
+                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
+                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
+                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } }
+                    ],
+                    [
+                        'Fecha en que se asignó', 'Fecha en que se completó',
+                        'Fecha en que se asignó', 'Fecha en que se completó',
+                        'Fecha en que se asignó', 'Fecha en que se completó',
+                        'Fecha en que se asignó', 'Fecha en que se completó'
+                    ]
+                ],
+                body: tableRows,
+                theme: 'grid',
+                styles: { fontSize: 7, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.1 },
+                headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                columnStyles: {
+                    0: { cellWidth: 15 },
+                    1: { cellWidth: 25 }
+                }
+            });
 
-  <!-- Para que el HTML quede igual que en la app -->
-  <script src="https://cdn.tailwindcss.com"></script>
+            const finalY = doc.lastAutoTable.finalY + 5;
+            doc.setFontSize(6);
+            doc.text('*Cuando comience una nueva página, anote en esta columna la última fecha en que los territorios se completaron.', 20, finalY);
+            doc.text('S-13-S 1/22', 20, finalY + 4);
 
-  <style>
-    @page { size: A4 landscape; margin: 10mm; }
-    body { background: #fff; }
-    /* Ajustes de impresión */
-    .no-print { display:none !important; }
-    /* Evita que se corte la tabla raro */
-    table, tr, td, th { page-break-inside: avoid; }
-  </style>
-</head>
-<body class="p-4">
-  ${reportHtml}
-  <script>
-    window.addEventListener('load', () => {
-      // Espera un toque a que Tailwind aplique estilos
-      setTimeout(() => window.print(), 250);
-    });
-  <\/script>
-</body>
-</html>`);
-            win.document.close();
+            doc.save(`S-13-S-TerritoryOS-${new Date().toISOString().slice(0, 10)}.pdf`);
         }
 
         function escapeHtml(str) {
@@ -2020,11 +2034,12 @@ function printSchedule() {
     scheduleWeek === 'next' ? 'Semana siguiente' :
     'Semana actual';
 
-  // ✅ Banner: intenta tomar de localStorage y si no, cae a RAM (si la tenés)
-  // Ajustá estos nombres a los que estés usando realmente:
+  // ✅ Banner: si hay imagen, se prioriza. Si no, se usa el color.
+  // - Imagen chica: se guarda en localStorage (SCHEDULE_TEMPLATE_SMALL_KEY)
+  // - Imagen grande: queda en RAM (scheduleTemplateRAM) hasta recargar la página
   const bannerDataUrl =
     localStorage.getItem(SCHEDULE_TEMPLATE_SMALL_KEY) ||
-    window.scheduleTemplateRAM ||
+    scheduleTemplateRAM ||
     '';
 
   const bannerColor =
