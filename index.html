@@ -53,6 +53,94 @@
             margin-bottom: 10px;
             text-align: center;
         }
+        /* =========================
+   IMPRESIÓN - PROGRAMA SEMANAL
+   ========================= */
+@media print {
+  body { background: white !important; }
+  .no-print { display: none !important; }
+  .print-sheet { display: block !important; }
+}
+
+.print-sheet {
+  display: none;
+  font-family: Arial, sans-serif;
+  color: #000;
+}
+
+.print-title {
+  text-align: center;
+  font-weight: 800;
+  font-size: 22px;
+  color: #0b3aa4; /* azul tipo tu planilla */
+  border: 3px solid #000;
+  padding: 10px;
+  margin: 0;
+}
+
+.print-subtitle {
+  text-align: center;
+  font-size: 12px;
+  margin: 6px 0 10px 0;
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.print-table th,
+.print-table td {
+  border: 2px solid #000;
+  padding: 6px 6px;
+  vertical-align: middle;
+}
+
+.print-table th {
+  font-weight: 800;
+  text-align: center;
+  background: #f2f2f2;
+}
+
+.print-day {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.print-time {
+  font-weight: 800;
+  color: #0b3aa4;
+  white-space: nowrap;
+}
+
+.print-sn {
+  color: #0b3aa4;
+  font-weight: 800;
+}
+
+.print-footer {
+  margin-top: 10px;
+  font-size: 11px;
+  text-align: right;
+}
+
+.print-banner {
+  width: 100%;
+  height: 120px;
+  border: 2px solid #111;
+  margin-bottom: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.print-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
     </style>
     <script>
         tailwind.config = {
@@ -80,21 +168,21 @@
                 </div>
                 
                 <nav class="space-y-1">
-                    <button onclick="setView('schedule')" id="nav-schedule"
+                    <button onclick="setView('schedule')" id="nav-schedule" data-nav="schedule"
   class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100">
   <i data-lucide="calendar-days" class="w-5 h-5"></i>
   <span class="text-sm">Programa</span>
 </button>
-                    <button onclick="setView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 bg-primary/10 text-primary font-medium">
+                    <button onclick="setView('dashboard')" id="nav-dashboard" data-nav="dashboard" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 bg-primary/10 text-primary font-medium">
                         <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                         <span class="text-sm">Dashboard</span>
                     </button>
-                    <button onclick="setView('management')" id="nav-management" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                    <button onclick="setView('management')" id="nav-management" data-nav="management" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100">
                         <i data-lucide="map" class="w-5 h-5"></i>
                         <span class="text-sm">Territorios</span>
                     </button>
                     <!-- MODIFICADO: Agregado id y onclick para Analíticas -->
-                    <button onclick="setView('analytics')" id="nav-analytics" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                    <button onclick="setView('analytics')" id="nav-analytics" data-nav="analytics" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-slate-600 hover:bg-slate-100">
                         <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                         <span class="text-sm">Analíticas</span>
                     </button>
@@ -224,7 +312,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <!-- Assignment Form -->
                         <div class="lg:col-span-1">
-                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-visible">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-visible relative z-20">
                                 <div class="p-6 border-b border-slate-200 bg-slate-50/50">
                                     <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                                         <i data-lucide="user-plus" class="w-5 h-5 text-primary"></i>
@@ -267,7 +355,7 @@
 
                         <!-- History & Map -->
                         <div class="lg:col-span-2 space-y-6">
-                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-visible">
+                            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-visible relative z-20">
                                 <div class="p-6 border-b border-slate-200 flex items-center justify-between">
                                     <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                                         <i data-lucide="history" class="w-5 h-5 text-primary"></i>
@@ -275,8 +363,8 @@
                                     </h3>
                                     <button class="text-primary text-sm font-semibold hover:underline">Ver todos</button>
                                 </div>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse">
+                                <div class="overflow-x-auto overflow-y-visible relative">
+  <table class="w-full text-left border-collapse">
                                         <thead class="bg-slate-50">
                                             <tr>
                                                 <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Conductor</th>
@@ -345,7 +433,51 @@
     </div>
   </div>
 
+<!-- ✅ NUEVO: Plantilla de impresión (imagen + color) -->
+<div class="bg-white border border-slate-200 rounded-xl p-6">
+  <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+    <div class="space-y-2">
+      <div class="text-slate-900 font-semibold">Plantilla para imprimir</div>
+      <div class="text-xs text-slate-500">
+        Si subís una imagen de <b>hasta 300 KB</b>, se guarda en este navegador (localStorage).
+        Si pesa más, se usa solo en RAM y <b>se pierde si recargás la página</b>.
+      </div>
 
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+        <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 cursor-pointer">
+          <i data-lucide="image" class="w-4 h-4"></i>
+          Subir imagen
+          <input id="schedule-template-file" type="file" accept="image/*" class="hidden" onchange="onScheduleTemplateSelected(event)">
+        </label>
+
+        <button onclick="clearScheduleTemplate()"
+          class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 flex items-center gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          Quitar imagen
+        </button>
+
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-slate-700 font-semibold">Color:</span>
+          <input id="schedule-template-color" type="color" value="#ffffff"
+            class="h-10 w-14 rounded border border-slate-200"
+            onchange="onScheduleColorChanged(this.value)">
+        </div>
+      </div>
+
+      <div id="schedule-template-disclaimer" class="text-xs text-amber-700 hidden"></div>
+    </div>
+
+    <div class="min-w-[220px]">
+      <div class="text-xs text-slate-500 mb-2">Vista previa</div>
+      <div class="rounded-xl border border-slate-200 overflow-hidden bg-white">
+        <img id="schedule-template-preview" src="" alt="Plantilla" class="w-full h-28 object-cover hidden">
+        <div id="schedule-template-preview-empty" class="h-28 flex items-center justify-center text-xs text-slate-400">
+          Sin imagen (se imprimirá solo con color)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
   <!-- ESTADO -->
  <!-- TABLA DEL PROGRAMA -->
 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
@@ -385,6 +517,11 @@
       <i data-lucide="calendar-check" class="w-4 h-4"></i>
       Auto completar
     </button>
+    <button onclick="printSchedule()"
+  class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 flex items-center gap-2">
+  <i data-lucide="printer" class="w-4 h-4"></i>
+  Imprimir
+</button>
   </div>
 
     </div>
@@ -392,17 +529,18 @@
 
   <div class="overflow-x-auto">
     <table class="w-full text-left border-collapse">
-      <thead class="bg-slate-50">
-        <tr>
-          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Día</th>
-          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fecha</th>
-          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Hora</th>
-          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Lugar</th>
-          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Territorios</th>
-          <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Conduce</th>
-          <th class="px-4 py-3"></th>
-        </tr>
-      </thead>
+<thead class="bg-slate-50">
+  <tr>
+    <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Día</th>
+    <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fecha</th>
+    <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Hora</th>
+    <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Lugar</th>
+    <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Territorios</th>
+    <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Conduce</th>
+    <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo</th>
+    <th class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Acciones</th>
+  </tr>
+</thead>
 
       <tbody id="schedule-body" class="divide-y divide-slate-100">
         <tr>
@@ -473,6 +611,12 @@
     </div>
 
     <script>
+
+        let scheduleBannerRam = null; // si es grande, vive acá (se pierde al recargar)
+const SCHEDULE_BANNER_LS_KEY = 'territoryos_schedule_banner';
+const SCHEDULE_BANNER_COLOR_KEY = 'territoryos_schedule_banner_color';
+const SCHEDULE_BANNER_MAX_KB = 300;
+
         // =========================
         // TerritoryOS - State & Storage (v1)
         // =========================
@@ -560,7 +704,7 @@
      function init() {
   loadSchedule();          // <-- AGREGAR ESTO
   setScheduleWeek('current'); // <-- opcional pero recomendado (renderiza tabla/badge)
-
+loadScheduleTemplateUI();
   recomputeTerritories(state);
   renderDashboard();
   renderManagement();
@@ -729,6 +873,8 @@ function toggleMenu(id, e) {
         // View Management
         // =========================
         function setView(view) {
+
+            setActiveNav(view);
             currentView = view;
             const dashboard = document.getElementById('view-dashboard');
             const management = document.getElementById('view-management');
@@ -942,11 +1088,18 @@ function toggleMenu(id, e) {
         // =========================
         // MODIFICADO: Funciones de Analíticas
         // =========================
-        function getAnalyticsData() {
+        
+        function compareTerritoryIds(a, b) {
+            const aId = String(a.id ?? '');
+            const bId = String(b.id ?? '');
+            return aId.localeCompare(bId, 'es', { numeric: true, sensitivity: 'base' });
+        }
+
+function getAnalyticsData() {
             // Filtrar territorios con al menos un registro y ordenar por ID
             const activeTerritories = state.territories
                 .filter(t => state.assignments.some(a => a.territoryId === t.id))
-                .sort((a, b) => a.id.localeCompare(b.id));
+                .sort(compareTerritoryIds);
 
             const reportData = [];
 
@@ -1041,71 +1194,63 @@ function toggleMenu(id, e) {
             container.innerHTML = html;
         }
 
+        
         async function generateAnalyticsPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
+            // Genera un "PDF" usando la impresión del navegador (más fiel al formulario).
+            // El usuario elige "Guardar como PDF" en el diálogo de impresión.
             const data = getAnalyticsData();
-
             if (data.length === 0) {
                 alert('No hay datos para generar el PDF.');
                 return;
             }
 
-            // Título y Año
-            doc.setFontSize(16);
-            doc.text('REGISTRO DE ASIGNACIÓN DE TERRITORIO', 148.5, 20, { align: 'center' });
-            doc.setFontSize(10);
-            doc.text(`Año de servicio: ${new Date().getFullYear()}`, 20, 30);
+            // Reutilizamos el mismo HTML de vista previa para que salga idéntico
+            // (si aún no está renderizado, lo renderizamos).
+            const container = document.getElementById('analytics-container');
+            if (!container || !container.querySelector('table')) {
+                renderAnalytics();
+            }
+            const reportHtml = (container ? container.innerHTML : '');
 
-            // Preparar filas para autoTable
-            const tableRows = data.map(row => {
-                const cols = [row.id, row.lastCompleted];
-                for (let i = 0; i < 4; i++) {
-                    const assign = row.assignments[i];
-                    if (assign) {
-                        cols.push(`${assign.conductor}\n(${assign.fechaISO})`);
-                        cols.push(assign.estado === 'Completado' ? assign.fechaISO : '');
-                    } else {
-                        cols.push('', '');
-                    }
-                }
-                return cols;
-            });
+            const win = window.open('', '_blank', 'noopener,noreferrer');
+            if (!win) {
+                alert('No se pudo abrir la ventana de impresión (bloqueada por el navegador). Habilita pop-ups para este sitio.');
+                return;
+            }
 
-            doc.autoTable({
-                startY: 35,
-                head: [
-                    [
-                        { content: 'Núm. de terr.', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-                        { content: 'Última fecha en que se completó', rowSpan: 2, styles: { halign: 'center', valign: 'middle' } },
-                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
-                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
-                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } },
-                        { content: 'Asignado a', colSpan: 2, styles: { halign: 'center' } }
-                    ],
-                    [
-                        'Fecha en que se asignó', 'Fecha en que se completó',
-                        'Fecha en que se asignó', 'Fecha en que se completó',
-                        'Fecha en que se asignó', 'Fecha en que se completó',
-                        'Fecha en que se asignó', 'Fecha en que se completó'
-                    ]
-                ],
-                body: tableRows,
-                theme: 'grid',
-                styles: { fontSize: 7, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.1 },
-                headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
-                columnStyles: {
-                    0: { cellWidth: 15 },
-                    1: { cellWidth: 25 }
-                }
-            });
-
-            const finalY = doc.lastAutoTable.finalY + 5;
-            doc.setFontSize(6);
-            doc.text('*Cuando comience una nueva página, anote en esta columna la última fecha en que los territorios se completaron.', 20, finalY);
-            doc.text('S-13-S 1/22', 20, finalY + 4);
-
-            doc.save(`S-13-S-TerritoryOS-${new Date().toISOString().slice(0, 10)}.pdf`);
+            win.document.open();
+            win.document.write(`<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>S-13-S - TerritoryOS</title>
+<style>
+  @page { size: A4 landscape; margin: 10mm; }
+  body { font-family: Arial, sans-serif; color:#000; background:#fff; }
+  .s13s-header-main { font-size: 14px; font-weight: bold; margin: 0 0 10px 0; text-align: center; letter-spacing: 0.3px; }
+  .s13s-table { width: 100%; border-collapse: collapse; font-size: 10px; background: white; }
+  .s13s-table th, .s13s-table td { border: 1px solid #000; padding: 4px; text-align: center; vertical-align: middle; }
+  .s13s-table th { background: #f3f4f6; font-weight: bold; }
+  .text-\[8px\] { font-size: 8px; }
+  .italic { font-style: italic; }
+  .uppercase { text-transform: uppercase; }
+  .mb-4 { margin-bottom: 14px; }
+  .mt-2 { margin-top: 10px; }
+  .mt-1 { margin-top: 6px; }
+  .border-b { border-bottom: 1px solid #000; }
+  .px-4 { padding-left: 12px; padding-right: 12px; }
+</style>
+</head>
+<body>
+${reportHtml}
+<script>
+  // Espera a que pinte y abre impresión automáticamente
+  window.addEventListener('load', () => setTimeout(() => window.print(), 200));
+</script>
+</body>
+</html>`);
+            win.document.close();
         }
 
         function escapeHtml(str) {
@@ -1365,6 +1510,106 @@ function syncScheduleToAssignments(scheduleEvents) {
 // ================================
 // PROGRAMA SEMANAL (UI BASE)
 // ================================
+
+// ================================
+// PLANTILLA DE IMPRESIÓN (imagen + color)
+// - <= 300KB: se guarda en localStorage
+// - > 300KB: se guarda SOLO en RAM (se pierde al recargar)
+// ================================
+const SCHEDULE_TEMPLATE_SMALL_KEY = 'territoryos_schedule_template_small_v1';
+const SCHEDULE_TEMPLATE_COLOR_KEY = 'territoryos_schedule_template_color_v1';
+
+let scheduleTemplateRAM = null; // dataURL grande (solo RAM)
+
+function loadScheduleTemplateUI() {
+  const previewImg = document.getElementById('schedule-template-preview');
+  const empty = document.getElementById('schedule-template-preview-empty');
+  const colorInput = document.getElementById('schedule-template-color');
+  const disclaimer = document.getElementById('schedule-template-disclaimer');
+
+  if (!previewImg || !empty || !colorInput || !disclaimer) return;
+
+  // color
+  const savedColor = localStorage.getItem(SCHEDULE_TEMPLATE_COLOR_KEY);
+  if (savedColor) colorInput.value = savedColor;
+
+  // imagen chica (localStorage)
+  const small = localStorage.getItem(SCHEDULE_TEMPLATE_SMALL_KEY);
+  if (small) {
+    previewImg.src = small;
+    previewImg.classList.remove('hidden');
+    empty.classList.add('hidden');
+  } else if (scheduleTemplateRAM) {
+    previewImg.src = scheduleTemplateRAM;
+    previewImg.classList.remove('hidden');
+    empty.classList.add('hidden');
+  } else {
+    previewImg.src = '';
+    previewImg.classList.add('hidden');
+    empty.classList.remove('hidden');
+  }
+
+  disclaimer.classList.add('hidden');
+  disclaimer.textContent = '';
+}
+
+function onScheduleColorChanged(value) {
+  try {
+    localStorage.setItem(SCHEDULE_TEMPLATE_COLOR_KEY, value || '#ffffff');
+  } catch {}
+}
+
+function clearScheduleTemplate() {
+  scheduleTemplateRAM = null;
+  try { localStorage.removeItem(SCHEDULE_TEMPLATE_SMALL_KEY); } catch {}
+  loadScheduleTemplateUI();
+}
+
+function onScheduleTemplateSelected(event) {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+
+  const disclaimer = document.getElementById('schedule-template-disclaimer');
+  const maxSmall = 300 * 1024;
+
+  // limpiamos el input para poder subir el mismo archivo de nuevo si quiere
+  event.target.value = '';
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = String(reader.result || '');
+
+    // <=300KB -> localStorage
+    if (file.size <= maxSmall) {
+      scheduleTemplateRAM = null;
+      try {
+        localStorage.setItem(SCHEDULE_TEMPLATE_SMALL_KEY, dataUrl);
+      } catch {
+        // si por algún motivo falla el storage, caemos a RAM
+        scheduleTemplateRAM = dataUrl;
+      }
+      if (disclaimer) {
+        disclaimer.classList.add('hidden');
+        disclaimer.textContent = '';
+      }
+    } else {
+      // >300KB -> RAM
+      scheduleTemplateRAM = dataUrl;
+      try { localStorage.removeItem(SCHEDULE_TEMPLATE_SMALL_KEY); } catch {}
+      if (disclaimer) {
+        disclaimer.classList.remove('hidden');
+        disclaimer.textContent =
+          '⚠️ La imagen supera 300 KB: se usará solo en RAM y se perderá si recargás la página.';
+      }
+    }
+
+    loadScheduleTemplateUI();
+    lucide.createIcons();
+  };
+
+  reader.readAsDataURL(file);
+}
+
 let scheduleWeek = 'current';
 
 // Semana en memoria (por ahora). Luego lo guardamos en state.schedule (3 semanas)
@@ -1428,15 +1673,16 @@ function updateScheduleSyncBadge() {
 }
 
 function addScheduleRow() {
-  const row = {
-    id: makeScheduleEventId(), // ya la tenés por lo de sync
-    day: 'Lunes',
-    dateISO: '',
-    time: '',
-    place: '',
-    territoriesText: '',
-    conductor: ''
-  };
+const row = {
+  id: makeScheduleEventId(),
+  kind: 'Normal', // ✅ NUEVO
+  day: 'Lunes',
+  dateISO: '',
+  time: '',
+  place: '',
+  territoriesText: '',
+  conductor: ''
+};
   scheduleData[scheduleWeek].rows.push(row);
 markScheduleDirty();
 saveSchedule();
@@ -1473,7 +1719,7 @@ function renderScheduleTable() {
   if (!rows.length) {
     body.innerHTML = `
       <tr>
-        <td class="px-4 py-6 text-sm text-slate-500" colspan="7">
+        <td class="px-4 py-6 text-sm text-slate-500" colspan="8">
           No hay salidas cargadas en esta semana.
         </td>
       </tr>`;
@@ -1483,7 +1729,10 @@ function renderScheduleTable() {
   const dayOptions = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo']
     .map(d => `<option value="${d}">${d}</option>`).join('');
 
-  body.innerHTML = rows.map(r => `
+  body.innerHTML = rows.map(r => {
+    const kind = r.kind || 'Normal';
+
+    return `
     <tr class="hover:bg-slate-50/50">
       <td class="px-4 py-3">
         <select class="rounded-lg border-slate-300 bg-white text-sm px-2 py-1"
@@ -1525,6 +1774,16 @@ function renderScheduleTable() {
           onchange="updateScheduleField('${r.id}','conductor',this.value)">
       </td>
 
+      <!-- ✅ Tipo -->
+      <td class="px-4 py-3">
+        <select class="rounded-lg border-slate-300 bg-white text-sm px-2 py-1 w-40"
+          onchange="updateScheduleField('${r.id}','kind',this.value)">
+          <option value="Normal" ${kind === 'Normal' ? 'selected' : ''}>Normal</option>
+          <option value="Asamblea" ${kind === 'Asamblea' ? 'selected' : ''}>Asamblea</option>
+          <option value="Conmemoración" ${kind === 'Conmemoración' ? 'selected' : ''}>Conmemoración</option>
+        </select>
+      </td>
+
       <td class="px-4 py-3 text-right">
         <button onclick="deleteScheduleRow('${r.id}')"
           class="text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg text-sm font-semibold">
@@ -1532,7 +1791,8 @@ function renderScheduleTable() {
         </button>
       </td>
     </tr>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function syncCurrentSchedule() {
@@ -1550,6 +1810,13 @@ function syncCurrentSchedule() {
   let skippedMissing = 0;
 
   for (const ev of events) {
+    
+const kind = String(ev.kind || 'Normal');
+if (kind !== 'Normal') {
+  // Asamblea / Conmemoración: NO impacta territorios
+  continue;
+}
+
     if (!ev) continue;
 
     const terr = parseTerritoriesInput(ev.territoriesText);
@@ -1711,6 +1978,225 @@ function autoFillWeekDates() {
 
   alert(`Fechas completadas ✅ (${changed} salidas actualizadas)`);
 }
+
+function formatShortDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T00:00:00');
+  if (isNaN(d.getTime())) return iso;
+  // 02-mar (como tu ejemplo)
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.', '');
+}
+
+function dayOrder(day) {
+  const map = {
+    'Lunes': 1,
+    'Martes': 2,
+    'Miércoles': 3,
+    'Jueves': 4,
+    'Viernes': 5,
+    'Sábado': 6,
+    'Domingo': 7,
+  };
+  return map[day] || 99;
+}
+
+function escapeHtmlSafe(s) {
+  return String(s ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+function printSchedule() {
+  const weekObj = scheduleData?.[scheduleWeek];
+  const rows = (weekObj?.rows || []).slice();
+
+  if (!rows.length) {
+    alert('No hay salidas para imprimir.');
+    return;
+  }
+
+  // Orden: día + hora
+  rows.sort((a,b) => {
+    const da = dayOrder(a.day), db = dayOrder(b.day);
+    if (da !== db) return da - db;
+    return String(a.time || '').localeCompare(String(b.time || ''));
+  });
+
+  const now = new Date();
+  const generated = now.toLocaleString('es-ES');
+
+  const weekLabel =
+    scheduleWeek === 'previous' ? 'Semana anterior' :
+    scheduleWeek === 'next' ? 'Semana siguiente' :
+    'Semana actual';
+
+  // ✅ Banner: intenta tomar de localStorage y si no, cae a RAM (si la tenés)
+  // Ajustá estos nombres a los que estés usando realmente:
+  const bannerDataUrl =
+    localStorage.getItem(SCHEDULE_TEMPLATE_SMALL_KEY) ||
+    scheduleTemplateRAM ||
+    '';
+
+  const bannerColor =
+    localStorage.getItem(SCHEDULE_TEMPLATE_COLOR_KEY) || '#ffffff';
+
+  const bodyHtml = rows.map(r => {
+    const kind = String(r.kind || 'Normal');
+    const dateShort = formatShortDate(r.dateISO);
+
+    if (kind !== 'Normal') {
+      // ✅ Fila especial (Asamblea/Conmemoración): NO territorios, solo lugar
+      return `
+        <tr>
+          <td class="print-day">${escapeHtmlSafe(r.day || '')} ${escapeHtmlSafe(dateShort)}</td>
+          <td class="print-time">${escapeHtmlSafe(r.time || '')}</td>
+          <td class="special" colspan="3">${escapeHtmlSafe(r.place || '')}</td>
+        </tr>
+      `;
+    }
+
+    const terrText = String(r.territoriesText || '').trim();
+    const terr = (terrText.toUpperCase() === 'SN')
+      ? `<span class="print-sn">SN</span>`
+      : escapeHtmlSafe(terrText);
+
+    return `
+      <tr>
+        <td class="print-day">${escapeHtmlSafe(r.day || '')} ${escapeHtmlSafe(dateShort)}</td>
+        <td class="print-time">${escapeHtmlSafe(r.time || '')}</td>
+        <td>${escapeHtmlSafe(r.place || '')}</td>
+        <td style="text-align:center;">${terr}</td>
+        <td style="text-align:center;">${escapeHtmlSafe(r.conductor || '')}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const bannerHtml = bannerDataUrl
+    ? `<div class="print-banner"><img src="${bannerDataUrl}" class="print-banner-img" alt="banner"></div>`
+    : `<div class="print-banner" style="background:${bannerColor};"></div>`;
+
+  const html = `
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Programa semanal</title>
+  <style>
+    /* CSS base del sitio */
+    ${document.querySelector('style')?.innerHTML || ''}
+
+    @page { size: A4 landscape; margin: 10mm; }
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; color:#000; }
+
+    /* Banner */
+    .print-banner {
+      height: 120px;
+      border: 2px solid #000;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .print-banner-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    /* Tabla y paginado */
+    table { width:100%; border-collapse: collapse; }
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+
+    .print-title {
+      text-align: center;
+      font-weight: 800;
+      font-size: 22px;
+      color: #0b3aa4;
+      border: 3px solid #000;
+      padding: 10px;
+      margin: 0 0 6px 0;
+    }
+    .print-subtitle {
+      text-align: center;
+      font-size: 12px;
+      margin: 0 0 10px 0;
+    }
+    .print-table th, .print-table td {
+      border: 2px solid #000;
+      padding: 6px 6px;
+      vertical-align: middle;
+      font-size: 12px;
+    }
+    .print-table th {
+      font-weight: 800;
+      text-align: center;
+      background: #f2f2f2;
+    }
+    .print-day { font-weight: 800; white-space: nowrap; }
+    .print-time { font-weight: 800; color: #0b3aa4; white-space: nowrap; }
+    .print-sn { color:#0b3aa4; font-weight:900; }
+    .special { color:#b91c1c; font-weight:900; text-align:center; }
+  </style>
+</head>
+<body>
+  ${bannerHtml}
+
+  <h1 class="print-title">Cong. Lamadrid - Arreglos de Predicación Semanal</h1>
+  <div class="print-subtitle">${escapeHtmlSafe(weekLabel)} · Generado: ${escapeHtmlSafe(generated)}</div>
+
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th style="width:140px;">Día</th>
+        <th style="width:90px;">Hora</th>
+        <th>Lugar de Encuentro</th>
+        <th style="width:140px;">N° de Territorio</th>
+        <th style="width:180px;">Conduce</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${bodyHtml}
+    </tbody>
+  </table>
+
+  <script>
+    window.onload = async () => {
+      const imgs = Array.from(document.images || []);
+      await Promise.all(imgs.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(res => { img.onload = img.onerror = res; });
+      }));
+      window.print();
+    };
+  <\/script>
+</body>
+</html>
+`;
+
+  const w = window.open('', '_blank');
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+function setActiveNav(view) {
+  const items = document.querySelectorAll('[data-nav]');
+  items.forEach(el => {
+    // tu clase activa (ajustala si usás otra)
+    el.classList.remove('bg-primary/10', 'text-primary');
+    el.classList.add('text-slate-700');
+  });
+
+  const active = document.querySelector(`[data-nav="${view}"]`);
+  if (active) {
+    active.classList.add('bg-primary/10', 'text-primary');
+    active.classList.remove('text-slate-700');
+  }
+}
+
     </script>
 </body>
 </html>

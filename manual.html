@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TerritoryOS — Manual de uso</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --muted:#a8b3cf;
+      --text:#eaf0ff;
+      --accent:#6d7cff;
+      --accent2:#31c48d;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --line:#22305a;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--sans);
+      background:linear-gradient(180deg, #0b1020 0%, #070a14 100%);
+      color:var(--text);
+    }
+    header{
+      padding:28px 18px 14px;
+      max-width:1100px; margin:0 auto;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      margin-bottom:10px;
+    }
+    .logo{
+      width:42px;height:42px;border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, #8aa0ff 0%, #6d7cff 45%, #3a48c9 100%);
+      box-shadow: 0 12px 30px rgba(109,124,255,.25);
+    }
+    h1{font-size:26px;margin:0}
+    .subtitle{color:var(--muted);margin:6px 0 0;font-size:14px;line-height:1.4}
+    main{max-width:1100px;margin:0 auto;padding:0 18px 42px}
+    nav{
+      position:sticky; top:0;
+      padding:10px 0; margin:14px 0 18px;
+      background: linear-gradient(180deg, rgba(11,16,32,0.92) 0%, rgba(11,16,32,0.70) 100%);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      z-index:2;
+    }
+    .toc{
+      display:flex; flex-wrap:wrap; gap:8px;
+      max-width:1100px; margin:0 auto; padding:0 18px;
+    }
+    .toc a{
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:13px;
+    }
+    .toc a:hover{border-color:rgba(109,124,255,.6)}
+    section{
+      background: rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:18px;
+      margin:14px 0;
+      box-shadow: 0 18px 40px rgba(0,0,0,.25);
+    }
+    h2{margin:0 0 10px;font-size:18px}
+    h3{margin:16px 0 8px;font-size:15px}
+    p{margin:8px 0;color:var(--text);line-height:1.55}
+    ul{margin:8px 0 8px 18px;color:var(--text);line-height:1.55}
+    li{margin:6px 0}
+    .muted{color:var(--muted)}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      font-size:12px; color:var(--text);
+    }
+    .ok{border-color:rgba(49,196,141,.35);background:rgba(49,196,141,.12)}
+    .warn{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.12)}
+    .danger{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.12)}
+    .grid{
+      display:grid; gap:12px;
+      grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+      margin-top:10px;
+    }
+    .card{
+      background: rgba(18,26,51,.55);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px;
+      padding:14px;
+    }
+    code, pre{
+      font-family:var(--mono);
+      font-size:12px;
+      color:#d8e2ff;
+    }
+    pre{
+      margin:10px 0;
+      padding:12px;
+      border-radius:14px;
+      background: rgba(0,0,0,0.35);
+      border:1px solid rgba(255,255,255,0.08);
+      overflow:auto;
+    }
+    .kbd{
+      font-family:var(--mono);
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      padding:2px 6px;
+      border-radius:8px;
+      font-size:12px;
+    }
+    footer{
+      max-width:1100px;margin:0 auto;padding:0 18px 28px;
+      color:var(--muted);font-size:12px;
+    }
+    .hr{height:1px;background:rgba(255,255,255,0.08);margin:10px 0}
+    a{color: #b8c2ff}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>TerritoryOS — Manual de uso</h1>
+        <div class="subtitle">
+          Gestión de territorios + programa semanal + impresión. Todo funciona localmente en el navegador (sin servidor).
+        </div>
+      </div>
+    </div>
+    <div class="pill ok">✅ Modo offline</div>
+    <div class="pill warn">⚠️ Los datos se guardan en el navegador (localStorage)</div>
+    <div class="pill danger">🧪 Si borrás datos del navegador, se pierde la información</div>
+  </header>
+
+  <nav>
+    <div class="toc">
+      <a href="#overview">Resumen</a>
+      <a href="#inicio">Primeros pasos</a>
+      <a href="#territorios">Territorios</a>
+      <a href="#registros">Registros</a>
+      <a href="#analiticas">Analíticas</a>
+      <a href="#programa">Programa semanal</a>
+      <a href="#sync">Sincronizar programa → territorios</a>
+      <a href="#imprimir">Imprimir programa</a>
+      <a href="#mapa">Mapa</a>
+      <a href="#datos">Datos y límites</a>
+      <a href="#backup">Backup / exportación</a>
+      <a href="#troubles">Solución de problemas</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="overview">
+      <h2>Resumen</h2>
+      <p>
+        TerritoryOS te permite:
+      </p>
+      <ul>
+        <li><b>Administrar territorios</b> (crear, buscar, seleccionar).</li>
+        <li><b>Registrar asignaciones</b> por territorio (conductor, fecha, estado, notas).</li>
+        <li><b>Ver analíticas</b> sobre estado general y actividad.</li>
+        <li><b>Crear un programa semanal</b> (Semana anterior / actual / siguiente).</li>
+        <li><b>Sincronizar salidas</b> del programa hacia el historial de cada territorio.</li>
+        <li><b>Imprimir programa</b> como PDF, con plantilla de imagen o color.</li>
+      </ul>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Cómo guarda los datos</h3>
+          <p class="muted">
+            Todo se guarda en el navegador (localStorage). No requiere internet para funcionar.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Para quién está pensado</h3>
+          <p class="muted">
+            Para uso personal o de una sola persona. Si querés multiusuario/login, hay que agregar backend.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Impresión</h3>
+          <p class="muted">
+            Se abre una ventana de impresión y podés guardar como PDF desde el navegador.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="inicio">
+      <h2>Primeros pasos</h2>
+      <h3>Abrir la app</h3>
+      <ul>
+        <li>Abrí el archivo <b>index.html</b> en tu navegador (Chrome/Edge recomendado).</li>
+        <li>Si está en GitHub Pages, entrás por la URL pública del sitio.</li>
+      </ul>
+
+      <h3>Navegación</h3>
+      <p>
+        El menú lateral permite ir a: <b>Programa</b>, <b>Dashboard</b>, <b>Territorios</b>, <b>Analíticas</b>, etc.
+        Si ves dos opciones “activas” al mismo tiempo, revisá que cada botón tenga su <code>data-nav</code> correcto.
+      </p>
+
+      <h3>Recomendado</h3>
+      <ul>
+        <li>Usá <span class="kbd">Ctrl</span> + <span class="kbd">F5</span> si actualizaste el archivo y no ves cambios.</li>
+        <li>Si algo “deja de funcionar”, abrí la consola: <span class="kbd">F12</span> → Console.</li>
+      </ul>
+    </section>
+
+    <section id="territorios">
+      <h2>Territorios</h2>
+      <p>
+        En la sección <b>Territorios</b> podés crear y seleccionar un territorio para gestionar su historial.
+      </p>
+
+      <h3>Crear un territorio</h3>
+      <ul>
+        <li>Click en <b>Nuevo territorio</b>.</li>
+        <li>Completá el nombre/número según tu formato (ej: “Territorio 01”).</li>
+        <li>Guardá.</li>
+      </ul>
+
+      <h3>Buscar un territorio</h3>
+      <ul>
+        <li>Usá el buscador superior para filtrar por nombre o número.</li>
+      </ul>
+    </section>
+
+    <section id="registros">
+      <h2>Registros por territorio</h2>
+      <p>
+        Cada territorio tiene un <b>Historial de registros</b>. Cada registro suele incluir:
+      </p>
+      <ul>
+        <li><b>Conductor</b> (quién lo llevó).</li>
+        <li><b>Fecha</b> de asignación.</li>
+        <li><b>Estado</b> (ej: En progreso / Completado, según tu implementación).</li>
+        <li>Notas u observaciones (si tu versión lo incluye).</li>
+      </ul>
+
+      <h3>Agregar un registro</h3>
+      <ul>
+        <li>Seleccioná el territorio.</li>
+        <li>En el panel “Nueva asignación”, completá los campos.</li>
+        <li>Click en <b>Confirmar registro</b>.</li>
+      </ul>
+
+      <h3>Editar un registro</h3>
+      <ul>
+        <li>En el historial, abrí el menú de acciones (tres puntitos).</li>
+        <li>Elegí <b>Editar registro</b> y guardá cambios.</li>
+      </ul>
+
+      <h3>Si el menú de acciones se ve cortado</h3>
+      <p class="muted">
+        Esto suele pasar por un contenedor con <code>overflow-x-auto</code> o <code>overflow:hidden</code>.
+        Solución típica: agregar <code>overflow-y-visible</code> y un <code>z-index</code> más alto al card del historial.
+      </p>
+    </section>
+
+    <section id="analiticas">
+      <h2>Analíticas</h2>
+      <p>
+        En <b>Analíticas</b se muestran métricas basadas en los registros cargados, como:
+      </p>
+      <ul>
+        <li>Total de territorios con actividad</li>
+        <li>Distribución por estado</li>
+        <li>Registros recientes (según tu vista)</li>
+      </ul>
+      <p class="muted">
+        Las analíticas dependen de lo que tu versión compute (puede variar si agregaste/quitaste gráficos).
+      </p>
+    </section>
+
+    <section id="programa">
+      <h2>Programa semanal</h2>
+      <p>
+        El <b>Programa semanal</b> está pensado para cargar salidas y luego, si querés, sincronizarlas con los territorios.
+        Maneja 3 semanas: <b>Semana anterior</b>, <b>Semana actual</b> y <b>Semana siguiente</b>.
+      </p>
+
+      <h3>Agregar una salida</h3>
+      <ul>
+        <li>Elegí la semana (anterior/actual/siguiente).</li>
+        <li>Click en <b>Agregar salida</b> para crear una fila.</li>
+        <li>Completá: Día, Fecha, Hora, Lugar, Territorios, Conduce, Tipo.</li>
+      </ul>
+
+      <h3>Campo “Territorios”</h3>
+      <ul>
+        <li>Formato sugerido: <b>“10 y 11”</b> o <b>“4-50-56”</b>.</li>
+        <li><b>SN</b>: salida sin territorio (no sincroniza a territorios).</li>
+      </ul>
+
+      <h3>Tipo: Normal / Asamblea / Conmemoración</h3>
+      <ul>
+        <li><b>Normal</b>: sincroniza a territorios (si hay territorios válidos).</li>
+        <li><b>Asamblea</b> y <b>Conmemoración</b>: se imprimen como evento especial y <b>no sincronizan</b>.</li>
+      </ul>
+
+      <p class="muted">
+        Si al elegir “Asamblea” imprimir deja de responder, suele ser por un error JS (por ejemplo usar una variable antes de declararla).
+        Revisá la consola con <span class="kbd">F12</span>.
+      </p>
+    </section>
+
+    <section id="sync">
+      <h2>Sincronizar programa → territorios</h2>
+      <p>
+        El botón <b>Sincronizar</b> toma salidas del programa (de la semana seleccionada) y crea registros en los territorios correspondientes.
+      </p>
+
+      <h3>Reglas de sincronización</h3>
+      <ul>
+        <li>Solo sincroniza filas con <b>Tipo = Normal</b>.</li>
+        <li>Si el campo Territorios es <b>SN</b>, se ignora (no genera registros).</li>
+        <li>Si hay múltiples territorios (ej: “10 y 11”), crea registro en ambos.</li>
+        <li>Usa la <b>Fecha</b> y el <b>Conductor</b> del programa como datos del registro en el territorio.</li>
+      </ul>
+
+      <h3>Recomendación</h3>
+      <p class="muted">
+        Antes de sincronizar, asegurate de que todas las filas tengan fecha y conductor. Si falta alguno, puede quedar un registro “incompleto”.
+      </p>
+    </section>
+
+    <section id="imprimir">
+      <h2>Imprimir programa</h2>
+      <p>
+        Desde <b>Programa semanal</b> podés imprimir/guardar como PDF el programa de la semana seleccionada.
+      </p>
+
+      <h3>Plantilla: imagen o color</h3>
+      <ul>
+        <li>Podés subir una <b>imagen</b> para que salga como encabezado/banda superior.</li>
+        <li>Si no subís imagen, el encabezado se imprime con un <b>color</b>.</li>
+      </ul>
+
+      <h3>Guardado de imagen (RAM vs localStorage)</h3>
+      <ul>
+        <li>Si la imagen es pequeña (por ejemplo <= <b>300 KB</b>), se puede guardar en <b>localStorage</b> y queda aunque recargues la página.</li>
+        <li>Si es grande, se usa en <b>RAM</b> (solo sesión). Si recargás, se pierde.</li>
+      </ul>
+
+      <h3>Tips para que salga el fondo/colores</h3>
+      <ul>
+        <li>En Chrome/Edge: cuando imprimís, activá la opción <b>“Gráficos de fondo”</b> si querés que salga el color de fondo.</li>
+        <li>Para evitar depender de esa opción, se recomienda imprimir un banner con <code>&lt;img&gt;</code> (si existe).</li>
+      </ul>
+
+      <h3>Varias páginas</h3>
+      <p class="muted">
+        Si hay muchas filas, el PDF sale en varias páginas. Para que el encabezado de la tabla se repita, se usa:
+      </p>
+      <pre><code>thead { display: table-header-group; }
+tr { page-break-inside: avoid; }</code></pre>
+    </section>
+
+    <section id="mapa">
+      <h2>Mapa (Google My Maps / iframe)</h2>
+      <p>
+        Se puede incrustar un mapa usando un <code>&lt;iframe&gt;</code> de Google My Maps.
+      </p>
+
+      <h3>Limitación importante</h3>
+      <p class="muted">
+        El menú/barra dentro del iframe es de Google y no puede “sacarse” con CSS desde tu página (por seguridad del navegador).
+        Lo que sí podés hacer: aumentar la altura del iframe o mostrar un botón “Abrir mapa”.
+      </p>
+    </section>
+
+    <section id="datos">
+      <h2>Datos y límites</h2>
+      <h3>¿Cuánto ocupa?</h3>
+      <p class="muted">
+        Como regla general, un registro típico (conductor, fecha, estado, notas) suele ocupar pocos KB.
+        50 territorios x 5 registros = 250 registros: normalmente <b>menos de 1 MB</b>.
+        Lo que más ocupa son <b>imágenes en localStorage</b> (por eso se limita a ~300KB).
+      </p>
+
+      <h3>Limitaciones del localStorage</h3>
+      <ul>
+        <li>El navegador tiene un límite (varía, pero suele ser ~5MB por dominio/origen).</li>
+        <li>Guardar imágenes grandes lo llena rápido.</li>
+        <li>Si se llena, el navegador puede lanzar errores al guardar.</li>
+      </ul>
+
+      <h3>Ventajas de “todo en un solo index.html”</h3>
+      <ul>
+        <li>Fácil de llevar, copiar y subir.</li>
+        <li>No requiere backend.</li>
+        <li>Funciona offline.</li>
+      </ul>
+
+      <h3>Desventajas</h3>
+      <ul>
+        <li>Login/multiusuario requiere un servidor.</li>
+        <li>Los datos están atados al navegador/dispositivo (si cambiás de PC, no se migran solos).</li>
+        <li>Riesgo de perder datos si se borra el storage del navegador.</li>
+      </ul>
+    </section>
+
+    <section id="backup">
+      <h2>Backup / exportación</h2>
+      <p>
+        Recomendación: hacer un backup periódico.
+      </p>
+
+      <h3>Opción simple</h3>
+      <ul>
+        <li>Guardar una copia del archivo <b>index.html</b> en otro lugar.</li>
+        <li>Exportar/pegar los datos si tu versión tiene botones “Export/Import”.</li>
+      </ul>
+
+      <h3>Idea recomendada (si querés agregarlo)</h3>
+      <p class="muted">
+        Agregar 2 botones:
+        <b>Exportar datos</b> (descarga JSON) y <b>Importar datos</b> (carga JSON). Esto te permite migrar de PC sin depender del navegador.
+      </p>
+    </section>
+
+    <section id="troubles">
+      <h2>Solución de problemas</h2>
+
+      <h3>“No responde nada / se rompió la página”</h3>
+      <ul>
+        <li>Abrí <span class="kbd">F12</span> → Console y mirá errores rojos.</li>
+        <li>Errores típicos:
+          <ul>
+            <li><b>Unexpected end of input</b> / <b>Unterminated template literal</b>: suele ser un backtick <code>`</code> sin cerrar o HTML mal copiado.</li>
+            <li>Si en un string HTML usás <code>&lt;/script&gt;</code>, dentro del template literal debe ser <code>&lt;\/script&gt;</code>.</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>“Imprimir no hace nada”</h3>
+      <ul>
+        <li>Revisá consola: muchas veces se rompe dentro de <code>printSchedule()</code>.</li>
+        <li>Causa común: usar una variable antes de definirla (ej: <code>dateShort</code>).</li>
+        <li>Otra causa: el popup está bloqueado. Permití popups para el sitio.</li>
+      </ul>
+
+      <h3>“El menú de acciones se corta”</h3>
+      <ul>
+        <li>Revisá contenedores con <code>overflow</code> en el historial.</li>
+        <li>Solución típica: <code>overflow-y-visible</code> y subir <code>z-index</code> del card.</li>
+      </ul>
+
+      <h3>“No se guardan datos al recargar”</h3>
+      <ul>
+        <li>Confirmá que tu versión llama a <code>save...</code> después de cambios (ej: en <code>updateScheduleField</code>).</li>
+        <li>Confirmá que no estás usando solo variables RAM para todo.</li>
+        <li>Confirmá que no está lleno el storage (errores de quota).</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2>FAQ</h2>
+
+      <h3>¿Se puede usar login?</h3>
+      <p class="muted">
+        Sí, pero no con solo HTML. Requiere backend (Firebase, Supabase, servidor propio, etc.).
+      </p>
+
+      <h3>¿Se puede sincronizar con Google My Maps “por territorio”?</h3>
+      <p class="muted">
+        Con iframe solo se puede mostrar el mapa general. Para “control por territorios” hay que usar una API o un enfoque más avanzado.
+      </p>
+
+      <h3>¿Qué pasa si cambio de PC?</h3>
+      <p class="muted">
+        El storage del navegador no viaja con vos. Para migrar necesitás exportar datos o copiar el storage manualmente (no recomendable).
+      </p>
+
+      <h3>¿Se puede usar con varias personas?</h3>
+      <p class="muted">
+        Se puede, pero si cada uno abre la app en su navegador, cada uno tendrá “su copia” de datos. Multiusuario real requiere backend.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="hr"></div>
+    TerritoryOS — Manual de uso (HTML). Recomendación: mantener este archivo en el repo junto al <b>index.html</b>.
+  </footer>
+</body>
+</html>
